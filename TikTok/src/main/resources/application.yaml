@@ -6,3 +6,8 @@ spring:
     username: root
     password: Grh122777
     url: jdbc:mysql://localhost:3306/tiktok?useSSL=false&serverTimezone=UTC&characterEncoding=utf8mb4&useUnicode=true
+  data:
+    redis:
+      port: 6379
+      host: 192.168.106.129
+      password: password
