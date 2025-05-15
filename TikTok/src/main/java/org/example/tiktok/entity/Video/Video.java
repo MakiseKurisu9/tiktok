@@ -15,13 +15,22 @@ public class Video extends BaseEntity {
 
     private String type;
 
-    private String source;
+    //通过fileProtect实现，故存储Long类型 保护资源路径
+    private Long source;
 
-    private String imgSource;
+    private Long imgSource;
 
     private VideoType videoType;
 
     private Long publisherId;
+
+    //第三方api字段
+    private String auditStatus;
+
+    private String auditMessage;
+
+    //例如 公开/私密
+    private String status;
 
     //冗余字段
     //点赞次数

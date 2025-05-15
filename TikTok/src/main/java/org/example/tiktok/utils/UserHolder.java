@@ -1,4 +1,4 @@
-package utils;
+package org.example.tiktok.utils;
 
 import org.example.tiktok.dto.UserDTO;
 
