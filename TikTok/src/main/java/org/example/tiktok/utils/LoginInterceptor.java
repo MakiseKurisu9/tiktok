@@ -1,4 +1,4 @@
-package utils;
+package org.example.tiktok.utils;
 
 import org.springframework.web.servlet.HandlerInterceptor;
 

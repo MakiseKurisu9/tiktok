@@ -11,3 +11,17 @@ spring:
       port: 6379
       host: 192.168.106.129
       password: password
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: kurisumakise195@gmail.com
+    password: jucc fhiq pshh jtxu
+    protocol: smtp
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
