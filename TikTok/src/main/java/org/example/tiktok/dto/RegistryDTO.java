@@ -11,6 +11,6 @@ public class RegistryDTO {
     private String email;
     private String password;
     private String code;
-    private String uuid;
     private String emailCode;
+    private String uuid;
 }

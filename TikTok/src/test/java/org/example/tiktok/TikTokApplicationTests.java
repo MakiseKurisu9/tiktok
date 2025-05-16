@@ -2,7 +2,7 @@ package org.example.tiktok;
 
 import jakarta.annotation.Resource;
 import org.example.tiktok.dto.EmailCodeDTO;
-import org.example.tiktok.service.UserService;
+import org.example.tiktok.service.LoginService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class TikTokApplicationTests {
 
     @Resource
-    UserService userService;
+    LoginService userService;
 
     @Test
     void testMail() {

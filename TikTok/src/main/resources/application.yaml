@@ -25,3 +25,14 @@ spring:
           starttls:
             enable: true
             required: true
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+jwt:
+  secret: mySuperSecretKeyForJWTThatMustBeAtLeast256BitsLong
+  expire: 86400000  # 24小时（单位：毫秒）
