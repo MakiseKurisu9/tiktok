@@ -68,6 +68,15 @@ CREATE TABLE IF NOT EXISTS favourite (
                                          update_time DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS favourite_video_relation (
+                                          id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                          fid BIGINT NOT NULL,
+                                          vid BIGINT NOT NULL
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+
 -- Follow table
 CREATE TABLE IF NOT EXISTS follow (
                                       id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -88,6 +97,9 @@ CREATE TABLE IF NOT EXISTS user_favourite_relation (
                                                        create_user_id BIGINT NOT NULL,
                                                        favourite_id BIGINT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
 
 -- VideoLike table
 CREATE TABLE IF NOT EXISTS video_like (

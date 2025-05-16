@@ -4,16 +4,14 @@ import com.google.code.kaptcha.Producer;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.example.tiktok.dto.EmailCodeDTO;
-import org.example.tiktok.dto.FindPasswordDTO;
-import org.example.tiktok.dto.LoginDTO;
-import org.example.tiktok.dto.RegistryDTO;
+import org.example.tiktok.dto.*;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.User.User;
 import org.example.tiktok.mapper.LoginMapper;
 import org.example.tiktok.mapper.UserMapper;
 import org.example.tiktok.service.LoginService;
 import org.example.tiktok.utils.JwtUtils;
+import org.example.tiktok.utils.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -98,6 +96,9 @@ public class UserServiceImpl implements LoginService {
         userInfo.put("email", user.getEmail());
 
         resultMap.put("userInfo",userInfo);
+
+        UserDTO currentUser = new UserDTO(user.getId(),user.getNickname(),user.getEmail());
+        UserHolder.saveUser(currentUser);
         return Result.ok("登陆成功",resultMap);
     }
 
