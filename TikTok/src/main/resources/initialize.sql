@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS video_type (
 CREATE TABLE IF NOT EXISTS user (
                                     id BIGINT PRIMARY KEY AUTO_INCREMENT,
                                     nickname VARCHAR(100),
-                                    username VARCHAR(100) NOT NULL,
+                                    email VARCHAR(255) NOT NULL,
                                     password VARCHAR(255) NOT NULL,
                                     user_description TEXT,
                                     avatar_source VARCHAR(255),
