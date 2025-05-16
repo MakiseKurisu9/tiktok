@@ -19,10 +19,11 @@ public class LoginController {
     @Resource
     LoginService userService;
 
+    //<img :src="`/captcha?uuid=${uuid}`" alt="验证码">
     @GetMapping("/captcha.jpg/{uuid}")
     public void getCaptcha(@PathVariable("uuid") String uuid,
                              HttpServletResponse response) throws IOException {
-        userService.getCaptcha(uuid,response);
+         userService.getCaptcha(uuid,response);
     }
 
     @PostMapping("/sendMail")
@@ -44,6 +45,5 @@ public class LoginController {
     public Result findPassword(@RequestBody FindPasswordDTO findPasswordDTO){
         return userService.findPassword(findPasswordDTO);
     }
-
 
 }
