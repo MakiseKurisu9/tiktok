@@ -2,11 +2,8 @@ package org.example.tiktok.controller;
 
 import jakarta.annotation.Resource;
 import org.example.tiktok.entity.Result;
-import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.service.VideoService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/video")
@@ -43,7 +40,7 @@ public class VideoController {
     }
 
     @PostMapping("/delete/{videoId}")
-    public Result delVideo(@PathVariable Long videoId) { return videoService.deleteVideo(videoId)}
+    public Result delVideo(@PathVariable Long videoId) { return videoService.deleteVideo(videoId);}
 
 
 
