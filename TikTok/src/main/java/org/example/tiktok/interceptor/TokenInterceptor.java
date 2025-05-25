@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.example.tiktok.dto.UserDTO;
 import org.example.tiktok.utils.JwtUtils;
@@ -14,10 +15,14 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import static org.example.tiktok.utils.SystemConstant.TOKEN_EXPIRE;
 import static org.example.tiktok.utils.SystemConstant.TOKEN_PREFIX;
 
 @Component
+@Slf4j
+//此拦截器判断用户是否携带token
 public class TokenInterceptor implements HandlerInterceptor {
 
     @Resource
@@ -31,22 +36,27 @@ public class TokenInterceptor implements HandlerInterceptor {
         String token = request.getHeader("Authorization");
 
         if(StringUtils.isEmpty(token)) {
-            throw new RuntimeException("not take token");
+            log.debug("No token provided, allowing access for public paths");
+            return true;
         }
 
-        try{
+        try {
             Claims claims = jwtUtils.parseToken(token);
 
             Long userId = claims.get("id", Long.class);
             if (userId == null) {
-                throw new RuntimeException("invalid token");
+                log.debug("invalid token, userId is null");
+                return true;
             }
             String key = TOKEN_PREFIX + userId;
             //is token expire or wrong
             String tokenRedis = stringRedisTemplate.opsForValue().get(key);
             if (tokenRedis == null || !token.equals(tokenRedis)) {
-                throw new RuntimeException("token wrong or expire");
+                log.debug("token wrong or expire");
+                return true;
             }
+
+            stringRedisTemplate.expire(key, Long.parseLong(TOKEN_EXPIRE), TimeUnit.DAYS);
 
             String nickname = claims.get("nickname", String.class);
             String email = claims.getSubject();
@@ -54,8 +64,11 @@ public class TokenInterceptor implements HandlerInterceptor {
             UserHolder.saveUser(userDTO);
             return true;
         } catch (Exception e) {
-            throw new RuntimeException("cannot parse token" + e.getMessage());
+            //出现异常不影响访问公共api
+            log.debug("failed to parse token" + e.getMessage());
         }
+        return true;
+
     }
 
     @Override

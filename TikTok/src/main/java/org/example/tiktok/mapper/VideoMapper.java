@@ -1,10 +1,6 @@
 package org.example.tiktok.mapper;
 
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.example.tiktok.entity.User.Favourite;
+import org.apache.ibatis.annotations.*;
 import org.example.tiktok.entity.Video.Video;
 
 import java.util.List;
@@ -13,13 +9,22 @@ import java.util.List;
 public interface VideoMapper {
 
     @Select("select v.* from favourite_video_relation f join video v on f.vid = v.id where f.fid = #{favouriteTableId}")
-    List<Video> getVideoInFavouriteTable(String favouriteTableId);
+    List<Video> getVideoInFavouriteTable(Long favouriteTableId);
 
     @Insert("insert into favourite_video_relation(fid, vid) values (#{favouriteTableId},#{videoId})")
-    void addVideoIntoFavouriteTable(String favouriteTableId,String videoId);
+    void addVideoIntoFavouriteTable(Long favouriteTableId,Long videoId);
 
     @Select("select * from favourite_video_relation where vid = #{videoId} and fid = #{favouriteTableId}")
-    Integer isVideoInFavouriteTable(String favouriteTableId, String videoId);
+    Integer isVideoInFavouriteTable(Long favouriteTableId, Long videoId);
+//in xml
+    List<Video> getVideosByVideoId(List<Long> ids);
 
-    List<Video> getVideoByVideoId(List<Long> ids);
+    @Update("update video set likes = likes + 1 where video.id = #{videoId}")
+    Boolean starVideo(Long videoId);
+
+    @Update("update video set likes = likes - 1 where video.id = #{videoId}")
+    Boolean decreaseStarVideo(Long videoId);
+
+
+
 }

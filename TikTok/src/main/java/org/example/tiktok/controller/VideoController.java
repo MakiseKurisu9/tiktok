@@ -18,17 +18,17 @@ public class VideoController {
     //favourite table
     //get all videos in a favourite table
     @GetMapping("/favourite/{favouriteTableId}")
-    public Result getVideoInFavouriteTable(@PathVariable String favouriteTableId) {
+    public Result getVideoInFavouriteTable(@PathVariable Long favouriteTableId) {
         return videoService.getVideoInFavouriteTable(favouriteTableId);
     }
 
     @PostMapping("/favourite/{favouriteTableId}/{videoId}")
-    public Result addVideoIntoFavouriteTable(@PathVariable String favouriteTableId,@PathVariable String videoId) {
+    public Result addVideoIntoFavouriteTable(@PathVariable Long favouriteTableId,@PathVariable Long videoId) {
         return videoService.addVideoIntoFavouriteTable(favouriteTableId,videoId);
     }
     //在用户刷视频的时候调用，在前端实现，视频播放几秒 后调用
     @PostMapping("/history/{videoId}")
-    public Result addVideoIntoHistory(@PathVariable String videoId) {
+    public Result addVideoIntoHistory(@PathVariable Long videoId) {
         return videoService.addVideoIntoHistory(videoId);
     }
 
@@ -36,5 +36,15 @@ public class VideoController {
     public Result getVideoHistory() {
         return videoService.getVideoHistory();
     }
+
+    @PostMapping("/star/{videoId}")
+    public Result starVideo(@PathVariable Long videoId) {
+        return videoService.starVideo(videoId);
+    }
+
+
+
+
+
 
 }

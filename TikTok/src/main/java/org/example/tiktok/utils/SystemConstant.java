@@ -11,6 +11,12 @@ public class SystemConstant {
     public static final String TOKEN_PREFIX = "user:token:";
 
     public static final String History_PREFIX = "video:history:";
+    //token expire = 1 day
+    public static final String TOKEN_EXPIRE = "1";
+
+    public static final Long NULL_VALUE_SAVE = Long.valueOf("30");
+
+    public static final Long CACHE_VIDEO_SAVE = Long.valueOf("2");
 
 
 }

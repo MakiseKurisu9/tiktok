@@ -2,16 +2,16 @@ package org.example.tiktok.service;
 
 
 import org.example.tiktok.entity.Result;
-import org.example.tiktok.entity.Video.Video;
 
-import java.util.List;
 
 public interface VideoService {
-    Result getVideoInFavouriteTable(String favouriteTableId);
+    Result getVideoInFavouriteTable(Long favouriteTableId);
 
-    Result addVideoIntoFavouriteTable(String favouriteTableId, String videoId);
+    Result addVideoIntoFavouriteTable(Long favouriteTableId, Long videoId);
 
-    Result addVideoIntoHistory(String videoId);
+    Result addVideoIntoHistory(Long videoId);
 
     Result getVideoHistory();
+
+    Result starVideo(Long videoId);
 }
