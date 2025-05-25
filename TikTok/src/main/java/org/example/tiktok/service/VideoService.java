@@ -14,4 +14,6 @@ public interface VideoService {
     Result getVideoHistory();
 
     Result starVideo(Long videoId);
+
+    Result deleteVideo(Long videoId);
 }

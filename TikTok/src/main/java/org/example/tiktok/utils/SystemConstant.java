@@ -18,5 +18,7 @@ public class SystemConstant {
 
     public static final Long CACHE_VIDEO_SAVE = Long.valueOf("2");
 
+    public static final String SINGLE_VIDEO_PREFIX = "video:";//+videoId
+
 
 }

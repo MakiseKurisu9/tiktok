@@ -42,7 +42,8 @@ public class VideoController {
         return videoService.starVideo(videoId);
     }
 
-
+    @PostMapping("/delete/{videoId}")
+    public Result delVideo(@PathVariable Long videoId) { return videoService.deleteVideo(videoId)}
 
 
 

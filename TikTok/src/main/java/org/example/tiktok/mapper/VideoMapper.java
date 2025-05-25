@@ -25,6 +25,16 @@ public interface VideoMapper {
     @Update("update video set likes = likes - 1 where video.id = #{videoId}")
     Boolean decreaseStarVideo(Long videoId);
 
+    @Delete("delete video from video where id = #{videoId}")
+    Boolean deleteVideo(Long videoId);
 
+    @Delete("delete from video_like where video_id = #{videoId}")
+    void deleteVideoLikes(Long videoId);
+
+    @Delete("delete from video_share where video_id = #{videoId}")
+    void deleteVideoShares(Long videoId);
+
+    @Delete("delete from video_type_relation where video_id = #{videoId}")
+    void deleteVideoTypeRelations(Long videoId);
 
 }
