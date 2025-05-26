@@ -2,20 +2,26 @@ package org.example.tiktok.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import jakarta.annotation.Resource;
-import net.sf.jsqlparser.statement.create.table.Index;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.entity.Video.VideoType;
 import org.example.tiktok.mapper.IndexMapper;
 import org.example.tiktok.service.IndexService;
 import org.example.tiktok.utils.PublicVideoServiceUtil;
+import org.example.tiktok.utils.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.example.tiktok.utils.SystemConstant.CACHE_VIDEO_SAVE;
@@ -53,7 +59,7 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public Result getPushedVideos() {
-
+        /*todo*/
         return null;
     }
 
@@ -83,5 +89,53 @@ public class IndexServiceImpl implements IndexService {
         }
         publicVideoServiceUtil.isStared(video);
         return Result.ok("success get video",video);
+    }
+
+    @Override
+    public Result searchVideo(String searchName, Integer page, Integer limit) {
+        PageBean<Video> pageResult = new PageBean<>();
+
+        PageHelper.startPage(page,limit);
+        List<Video> videos = indexMapper.searchVideo(searchName);
+        Page<Video> pageVideos = (Page<Video>)videos;
+
+        pageResult.setTotal(pageVideos.getTotal());
+        pageResult.setItems(pageVideos.getResult());
+
+        if(videos.isEmpty()) {
+            return Result.ok("cannot search any information",Collections.emptyList());
+        } else {
+            return Result.ok("successfully search data",pageResult);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Result shareVideo(Long videoId, HttpServletRequest request) {
+        String ip = getClientRealIp(request);
+        Long userId = UserHolder.getUser().getId();
+        indexMapper.shareVideo(userId,ip,videoId);
+        CompletableFuture.runAsync(() -> {
+            indexMapper.updateVideoShare(videoId);
+        });
+        String serverName = request.getServerName();
+        int serverPort = request.getServerPort();
+        String shareUrl = "http://" + serverName + ":" +serverPort + "/video/" + videoId;
+        return Result.ok("share successfully",shareUrl);
+    }
+
+    private String getClientRealIp(HttpServletRequest request) {
+        //记录代理ip
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty() && !"unknown".equalsIgnoreCase(xRealIp)) {
+            return xRealIp;
+        }
+
+        return request.getRemoteAddr();
     }
 }

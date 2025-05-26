@@ -1,7 +1,6 @@
 package org.example.tiktok.mapper;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.entity.Video.VideoType;
 
@@ -18,4 +17,12 @@ public interface IndexMapper {
 
     @Select("select * from video where video.id = #{videoId}")
     Video getVideoById(Long videoId);
+
+    List<Video> searchVideo(@Param("searchName") String searchName);
+
+    @Insert("insert into video_share(share_user_id, ip, video_id) values (#{shareUserId},#{ip},#{videoId})")
+    void shareVideo(Long shareUserId,String ip, Long videoId);
+
+    @Update("update video set shares = shares + 1 where id = #{videoId}")
+    void updateVideoShare(Long videoId);
 }

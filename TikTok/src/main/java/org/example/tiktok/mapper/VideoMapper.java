@@ -17,7 +17,7 @@ public interface VideoMapper {
     @Select("select * from favourite_video_relation where vid = #{videoId} and fid = #{favouriteTableId}")
     Integer isVideoInFavouriteTable(Long favouriteTableId, Long videoId);
 //in xml
-    List<Video> getVideosByVideoId(List<Long> ids);
+    List<Video> getVideosByVideoId(@Param("ids") List<Long> ids);
 
     @Update("update video set likes = likes + 1 where video.id = #{videoId}")
     Boolean starVideo(Long videoId);
@@ -36,5 +36,8 @@ public interface VideoMapper {
 
     @Delete("delete from video_type_relation where video_id = #{videoId}")
     void deleteVideoTypeRelations(Long videoId);
+
+    @Select("select * from video where publisher_id = #{userId}")
+    List<Video> getVideosByUserId(@Param("userId") Long userId);
 
 }

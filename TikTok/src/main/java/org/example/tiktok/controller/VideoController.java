@@ -42,6 +42,14 @@ public class VideoController {
     @PostMapping("/delete/{videoId}")
     public Result delVideo(@PathVariable Long videoId) { return videoService.deleteVideo(videoId);}
 
+    //获取某人发布的所有视频
+    @GetMapping
+    public Result listVideos(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer limit
+    ) {
+        return videoService.listVideos(page,limit);
+    }
 
 
 

@@ -16,4 +16,6 @@ public interface VideoService {
     Result starVideo(Long videoId);
 
     Result deleteVideo(Long videoId);
+
+    Result listVideos(Integer page,Integer limit);
 }

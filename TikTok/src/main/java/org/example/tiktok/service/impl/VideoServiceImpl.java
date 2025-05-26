@@ -1,7 +1,10 @@
 package org.example.tiktok.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.BooleanUtils;
+import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.mapper.VideoMapper;
@@ -133,5 +136,25 @@ public class VideoServiceImpl implements VideoService {
             return Result.fail("fail to delete video");
         }
     }
+
+    @Override
+    public Result listVideos(Integer page, Integer limit) {
+        PageBean<Video> pageBean = new PageBean<>();
+
+        Long userId = UserHolder.getUser().getId();
+        PageHelper.startPage(page,limit);
+        List<Video> videos = videoMapper.getVideosByUserId(userId);
+        Page<Video> pageResult = (Page<Video>) videos;
+
+        pageBean.setItems(pageResult.getResult());
+        pageBean.setTotal(pageResult.getTotal());
+        if(videos.isEmpty()) {
+            return Result.ok("this user do not publish any video",Collections.emptyList());
+        }
+        else {
+            return Result.ok("successfully get data",pageBean);
+        }
+    }
+
 
 }

@@ -13,7 +13,7 @@ public class Video extends BaseEntity {
     private String title;
 
     private String description;
-
+    //冗余
     private String type;
 
     //通过fileProtect实现，故存储Long类型 保护资源路径
