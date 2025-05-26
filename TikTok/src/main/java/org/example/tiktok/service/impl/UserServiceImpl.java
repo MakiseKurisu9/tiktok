@@ -8,16 +8,15 @@ import org.example.tiktok.dto.*;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.User.User;
 import org.example.tiktok.mapper.LoginMapper;
-import org.example.tiktok.mapper.UserMapper;
 import org.example.tiktok.service.LoginService;
+import org.example.tiktok.utils.EmailValidator;
 import org.example.tiktok.utils.JwtUtils;
+import org.example.tiktok.utils.PasswordUtils;
 import org.example.tiktok.utils.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import org.example.tiktok.utils.EmailValidator;
-import org.example.tiktok.utils.PasswordUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
