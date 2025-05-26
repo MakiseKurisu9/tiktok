@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.tiktok.mapper.CustomerMapper">
+    <!--批量通过id查询视频-->
+    <insert id="subscribeVideoTypes">
+        INSERT INTO subscribe_video_type (user_id, video_type_id)
+        VALUES
+        <foreach collection="typeIds" item="typeId" separator=",">
+            (#{userId}, #{typeId})
+        </foreach>
+    </insert>
+
+    <select id="getVideoTypesByIds" resultType="VideoType">
+        SELECT * FROM video_type WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

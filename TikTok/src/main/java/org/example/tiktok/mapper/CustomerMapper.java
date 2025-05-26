@@ -2,6 +2,7 @@ package org.example.tiktok.mapper;
 
 import org.apache.ibatis.annotations.*;
 import org.example.tiktok.entity.User.Favourite;
+import org.example.tiktok.entity.Video.VideoType;
 
 import java.util.List;
 
@@ -29,4 +30,12 @@ public interface CustomerMapper {
 
     @Delete("delete from user_favourite_relation where favourite_id = #{favouriteId}")
     void delFavouriteUserById(Long favouriteId);
+
+    void subscribeVideoTypes(@Param("userId") Long userId,@Param("typeIds") List<Long> typeIds);
+
+    //返回的是订阅的视频分类id
+    @Select("select * from subscribe_video_type where user_id = #{userId}")
+    List<Long> getSubscribeByUserId(Long userId);
+
+    List<VideoType> getVideoTypesByIds(@Param("ids") List<Long> videoTypeId);
 }

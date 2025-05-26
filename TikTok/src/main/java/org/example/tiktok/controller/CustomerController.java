@@ -39,5 +39,18 @@ public class CustomerController {
         return customerService.delFavourite(favouriteId);
     }
 
+    //订阅分类
+    @PostMapping("/subscribe")
+    public Result subscribeVideoTypes(@RequestParam String types){
+        return customerService.subscribeVideoTypes(types);
+    }
+
+    //获取用户订阅的分类
+    @GetMapping("/subscribe")
+    public Result getSubscribe() {
+        return customerService.getSubscribeByUserId();
+    }
+
+
 
 }

@@ -12,4 +12,8 @@ public interface CustomerService {
 
     Result delFavourite(Long favouriteId);
 
+    Result subscribeVideoTypes(String types);
+
+    Result getSubscribeByUserId();
+
 }

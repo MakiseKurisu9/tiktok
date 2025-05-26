@@ -14,7 +14,7 @@ public class PublicVideoServiceUtil {
 
     public void isStared(Video video) {
         Long userId = UserHolder.getUser().getId();
-        String key = "video:liked" + video.getId();
+        String key = "video:liked:" + video.getId();
         //判断用户是否已经点赞
         Boolean member = stringRedisTemplate.opsForSet().isMember(key, userId.toString());
         video.setIsLiked(BooleanUtils.isTrue(member));

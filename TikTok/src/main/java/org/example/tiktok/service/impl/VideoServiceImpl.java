@@ -101,20 +101,23 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
+    @Transactional
     public Result starVideo(Long videoId) {
         Long userId = UserHolder.getUser().getId();
-        String key = "video:liked" + videoId;
+        String key = "video:liked:" + videoId;
         //判断用户是否已经点赞
         Boolean member = stringRedisTemplate.opsForSet().isMember(key, userId.toString());
         if (BooleanUtils.isFalse(member)) {
-            Boolean isStarSuccess = videoMapper.starVideo(videoId);
-            if(isStarSuccess){
+            Boolean isStarSuccess = videoMapper.starVideo(videoId) ;
+            Boolean isLikeSuccess =videoMapper.videoLike(videoId,userId) ;
+            if(isStarSuccess && isLikeSuccess){
                 stringRedisTemplate.opsForSet().add(key, userId.toString());
                 return Result.ok("star success");
             }
         } else {
             Boolean isNotStarSuccess = videoMapper.decreaseStarVideo(videoId);
-            if(isNotStarSuccess){
+            Boolean isNotLikeSuccess =videoMapper.videoNotLike(videoId,userId);
+            if(isNotStarSuccess && isNotLikeSuccess){
                 stringRedisTemplate.opsForSet().remove(key, userId.toString());
                 return Result.ok("decrease star success");
             }

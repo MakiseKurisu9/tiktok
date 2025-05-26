@@ -22,8 +22,14 @@ public interface VideoMapper {
     @Update("update video set likes = likes + 1 where video.id = #{videoId}")
     Boolean starVideo(Long videoId);
 
+    @Insert("insert into video_like(video_id, like_id) VALUES (#{videoId},#{userId})")
+    Boolean videoLike(Long videoId, Long userId);
+
     @Update("update video set likes = likes - 1 where video.id = #{videoId}")
     Boolean decreaseStarVideo(Long videoId);
+
+    @Delete("delete from video_like where video_id = #{videoId} and like_id = #{userId}")
+    Boolean videoNotLike(Long videoId, Long userId);
 
     @Delete("delete video from video where id = #{videoId}")
     Boolean deleteVideo(Long videoId);
