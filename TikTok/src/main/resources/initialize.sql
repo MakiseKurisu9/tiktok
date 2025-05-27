@@ -34,7 +34,9 @@ CREATE TABLE IF NOT EXISTS user (
                                     avatar_source VARCHAR(255),
                                     create_time DATETIME NOT NULL,
                                     update_time DATETIME NOT NULL,
-                                    sex VARCHAR(5)
+                                    sex VARCHAR(5),
+                                    follow BIGINT DEFAULT 0,
+                                    followers BIGINT DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Video table

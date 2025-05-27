@@ -64,15 +64,30 @@ public class CustomerController {
         return customerService.getUserInfoByUserId(userId);
     }
 
-    @GetMapping("/followsIds")
-    public Result getFollowers() {
-        return customerService.getFollowers();
-    }
 
     @PutMapping
     public Result updateUserInfo(String nickName,String avatarSource,
                                  String sex, String userDescription) {
         return customerService.updateUserInfo(nickName,avatarSource,sex,userDescription);
+    }
+
+    //用户是哪个人的粉丝
+    @GetMapping("/follow")
+    public Result getFollow(@RequestParam(defaultValue = "1") Integer page,
+                            @RequestParam(defaultValue = "10") Integer limit){
+        return customerService.getFollow(page,limit);
+    }
+
+    @GetMapping("/followers")
+    public Result getFollowers(@RequestParam(defaultValue = "1") Integer page,
+                               @RequestParam(defaultValue = "10") Integer limit) {
+        return customerService.getFollowers(page,limit);
+    }
+
+    @PostMapping("/{id}/{isFollow}")
+    //前端判断isFollow
+    public Result followUser(@PathVariable("id") Long followUserId,@PathVariable("isFollow") Boolean isFollow) {
+        return customerService.followUser(followUserId,isFollow);
     }
 
 

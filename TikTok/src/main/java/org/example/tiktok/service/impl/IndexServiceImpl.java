@@ -2,8 +2,8 @@ package org.example.tiktok.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -97,16 +97,17 @@ public class IndexServiceImpl implements IndexService {
 
         PageHelper.startPage(page,limit);
         List<Video> videos = indexMapper.searchVideo(searchName);
-        Page<Video> pageVideos = (Page<Video>)videos;
 
-        pageResult.setTotal(pageVideos.getTotal());
-        pageResult.setItems(pageVideos.getResult());
+        PageInfo<Video> pageInfo= new PageInfo<>(videos);
+
+        pageResult.setTotal(pageInfo.getTotal());
+        pageResult.setItems(pageInfo.getList());
 
         if(videos.isEmpty()) {
             return Result.ok("cannot search any information",Collections.emptyList());
-        } else {
-            return Result.ok("successfully search data",pageResult);
         }
+        return Result.ok("successfully search data",pageResult);
+
     }
 
     @Override

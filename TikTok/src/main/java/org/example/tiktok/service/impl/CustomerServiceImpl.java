@@ -1,8 +1,11 @@
 package org.example.tiktok.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import org.example.tiktok.dto.FavouriteDTO;
 import org.example.tiktok.dto.FollowersDTO;
+import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.User.Favourite;
 import org.example.tiktok.entity.User.User;
@@ -11,6 +14,7 @@ import org.example.tiktok.mapper.CustomerMapper;
 import org.example.tiktok.service.CustomerService;
 import org.example.tiktok.utils.AliOSSUtil;
 import org.example.tiktok.utils.UserHolder;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +31,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Resource
     CustomerMapper customerMapper;
+
+    @Resource
+    StringRedisTemplate stringRedisTemplate;
 
     @Resource
     AliOSSUtil aliOSSUtil;
@@ -131,17 +138,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Result getFollowers() {
-        Long userId = UserHolder.getUser().getId();
-        List<Long> followers = customerMapper.getFollowers(userId);
-        if(followers == null || followers.isEmpty()) {
-            return Result.ok("this user do not have any followers",Collections.emptyList());
-        }
-        List<FollowersDTO> followersInfo = customerMapper.getFollowersInfo(followers);
-        return Result.ok("successfully get followers",followersInfo);
-    }
-
-    @Override
     public Result updateUserInfo(String nickName, String avatarSource, String sex, String userDescription) {
         User user = new User();
         user.setNickname(nickName);
@@ -150,6 +146,66 @@ public class CustomerServiceImpl implements CustomerService {
         user.setAvatarSource(avatarSource);
         customerMapper.updateUserInfo(user);
         return Result.ok("successfully update user info",user);
+    }
+
+    @Override
+    public Result getFollow(Integer page, Integer limit) {
+        Long userId = UserHolder.getUser().getId();
+        //获取了这个人关注的所有用户id
+        List<Long> followIds = customerMapper.getFollowIds(userId);
+        if(followIds == null || followIds.isEmpty()) {
+            return Result.ok("this user do not follow anyone",Collections.emptyList());
+        }
+        PageHelper.startPage(page,limit);
+        List<FollowersDTO> follows = customerMapper.getFollowInfo(followIds);
+        PageInfo<FollowersDTO> pageInfo = new PageInfo<>(follows);
+
+        PageBean<FollowersDTO> pageBean = new PageBean<>();
+        pageBean.setItems(pageInfo.getList());
+        pageBean.setTotal(pageInfo.getTotal());
+        return Result.ok("successfully get follow",pageBean);
+    }
+
+    @Override
+    public Result getFollowers(Integer page, Integer limit) {
+        Long userId = UserHolder.getUser().getId();
+        List<Long> followersId = customerMapper.getFollowers(userId);
+        if(followersId == null || followersId.isEmpty()) {
+            return Result.ok("this user do not have any followers",Collections.emptyList());
+        }
+        PageHelper.startPage(page,limit);
+        List<FollowersDTO> followers = customerMapper.getFollowersInfo(followersId);
+        PageInfo<FollowersDTO> pageInfo = new PageInfo<>(followers);
+
+        PageBean<FollowersDTO> pageBean = new PageBean<>();
+        pageBean.setTotal(pageInfo.getTotal());
+        pageBean.setItems(pageInfo.getList());
+        return Result.ok("successfully get followers",pageBean);
+    }
+
+    @Override
+    public Result followUser(Long followUserId, Boolean isFollow) {
+        Long userId = UserHolder.getUser().getId();
+        //redis存储关注用户的数据
+        String key = "follows:" + userId;
+        //已经关注了，再点取关
+        if(isFollow(followUserId)) {
+            int isSuccess = customerMapper.unFollow(followUserId, userId);
+            if(isSuccess > 0) {
+                stringRedisTemplate.opsForSet().remove(key,followUserId.toString());
+            }
+        } else {
+            int isSuccess = customerMapper.follow(followUserId, userId);
+            if(isSuccess > 0) {
+                stringRedisTemplate.opsForSet().add(key,followUserId.toString());
+            }
+        }
+        return Result.ok("关注/取关成功");
+    }
+
+    private Boolean isFollow(Long followUserId){
+        Long userId = UserHolder.getUser().getId();
+        return customerMapper.isFollow(followUserId,userId) > 0;
     }
 
 

@@ -53,13 +53,13 @@ public class TokenInterceptor implements HandlerInterceptor {
                 log.debug("tokenRedis is null or wrong");
                 return true;
             }
-
+            //用户停留在公共页面时一直刷新token时长
             stringRedisTemplate.expire(key, Long.parseLong(TOKEN_EXPIRE), TimeUnit.DAYS);
 
             String nickname = claims.get("nickname", String.class);
             String email = claims.getSubject();
 
-            if(nickname != null && email != null && userId != null) {
+            if(nickname != null && email != null) {
                 UserDTO userDTO = new UserDTO(userId,nickname,email);
                 UserHolder.saveUser(userDTO);
             }

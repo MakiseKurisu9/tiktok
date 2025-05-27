@@ -26,4 +26,11 @@
         </foreach>
     </select>
 
+    <select id="getFollowInfo" resultType="FollowersDTO">
+        select id,user.nickname,user.avatar_source from user where id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>

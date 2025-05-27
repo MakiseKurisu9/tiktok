@@ -1,7 +1,7 @@
 package org.example.tiktok.service.impl;
 
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.BooleanUtils;
 import org.example.tiktok.dto.PageBean;
@@ -147,16 +147,17 @@ public class VideoServiceImpl implements VideoService {
         Long userId = UserHolder.getUser().getId();
         PageHelper.startPage(page,limit);
         List<Video> videos = videoMapper.getVideosByUserId(userId);
-        Page<Video> pageResult = (Page<Video>) videos;
-
-        pageBean.setItems(pageResult.getResult());
-        pageBean.setTotal(pageResult.getTotal());
-        if(videos.isEmpty()) {
+        if( videos == null || videos.isEmpty() ) {
             return Result.ok("this user do not publish any video",Collections.emptyList());
         }
-        else {
-            return Result.ok("successfully get data",pageBean);
-        }
+        PageInfo<Video> pageInfo = new PageInfo<>(videos);
+
+        pageBean.setItems(pageInfo.getList());
+        pageBean.setTotal(pageInfo.getTotal());
+
+
+        return Result.ok("successfully get data",pageBean);
+
     }
 
 

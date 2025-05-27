@@ -44,12 +44,27 @@ public interface CustomerMapper {
     @Select("select * from user where id = #{userId}")
     User getUserByUserId(Long userId);
 
+    @Update("update user set nickname=#{nickName},avatar_source=#{avatarSource}," +
+            "sex=#{sex},user_description=#{userDescription},create_time=NOW()" +
+            " where id = #{Id}")
+    void updateUserInfo(User user);
+
+    @Select("select follow.follow_id from follow where follower_id = #{userId}")
+    List<Long> getFollowIds(Long userId);
+
+    List<FollowersDTO> getFollowInfo(@Param("ids") List<Long> followId);
+
     @Select("select follower_id from follow where follow_id = #{followId}")
     List<Long> getFollowers(Long followId);
 
     List<FollowersDTO> getFollowersInfo(@Param("ids") List<Long> followersId);
 
-    @Update("update user set nickname=#{nickName},avatar_source=#{avatarSource}," +
-            "sex=#{sex},user_description=#{userDescription} where id = #{Id}")
-    void updateUserInfo(User user);
+    @Select("select count(*) from follow where follow_id =#{followUserId} and follower_id = #{followerId}")
+    int isFollow(Long followUserId,Long followerId);
+
+    @Delete("delete from follow where follow_id =#{followUserId} and follower_id = #{followerId}")
+    int unFollow(Long followUserId, Long followerId);
+
+    @Insert("INSERT INTO follow (follow_id, follower_id) VALUES (#{followUserId}, #{followerId})")
+    int follow(Long followUserId, Long followerId);
 }

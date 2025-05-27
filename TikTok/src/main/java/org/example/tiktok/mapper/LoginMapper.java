@@ -9,8 +9,8 @@ import org.example.tiktok.entity.User.User;
 @Mapper
 public interface LoginMapper {
 
-    @Insert("insert into user(nickname,  password, user_description, avatar_source,email, create_time, update_time) " +
-            "VALUES (#{nickname},#{password},#{userDescription},#{avatarSource},#{email},NOW(),NOW())")
+    @Insert("insert into user(nickname,  password, user_description, avatar_source,email, create_time, update_time,follow,followers) " +
+            "VALUES (#{nickname},#{password},#{userDescription},#{avatarSource},#{email},NOW(),NOW(),0,0)")
     void registry(User user);
 
     @Select("select * from user where email = #{email}")

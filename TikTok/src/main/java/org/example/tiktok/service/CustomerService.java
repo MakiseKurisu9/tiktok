@@ -23,7 +23,13 @@ public interface CustomerService {
 
     Result getUserInfoByUserId(Long userId);
 
-    Result getFollowers();
+
 
     Result updateUserInfo(String nickName, String avatarSource, String sex, String userDescription);
+
+    Result getFollow(Integer page, Integer limit);
+
+    Result getFollowers(Integer page, Integer limit);
+
+    Result followUser(Long followUserId, Boolean isFollow);
 }
