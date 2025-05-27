@@ -64,5 +64,16 @@ public class CustomerController {
         return customerService.getUserInfoByUserId(userId);
     }
 
+    @GetMapping("/followsIds")
+    public Result getFollowers() {
+        return customerService.getFollowers();
+    }
+
+    @PutMapping
+    public Result updateUserInfo(String nickName,String avatarSource,
+                                 String sex, String userDescription) {
+        return customerService.updateUserInfo(nickName,avatarSource,sex,userDescription);
+    }
+
 
 }

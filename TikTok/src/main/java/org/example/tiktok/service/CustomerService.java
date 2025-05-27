@@ -22,4 +22,8 @@ public interface CustomerService {
     Result uploadAvatar(MultipartFile file) throws IOException;
 
     Result getUserInfoByUserId(Long userId);
+
+    Result getFollowers();
+
+    Result updateUserInfo(String nickName, String avatarSource, String sex, String userDescription);
 }

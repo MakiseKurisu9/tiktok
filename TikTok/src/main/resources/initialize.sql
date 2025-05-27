@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS user (
                                     user_description TEXT,
                                     avatar_source VARCHAR(255),
                                     create_time DATETIME NOT NULL,
-                                    update_time DATETIME NOT NULL
+                                    update_time DATETIME NOT NULL,
+                                    sex VARCHAR(5)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Video table

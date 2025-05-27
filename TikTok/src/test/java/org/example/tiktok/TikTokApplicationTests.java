@@ -32,7 +32,7 @@ class TikTokApplicationTests {
             // 本地图片路径
             String localFilePath = "E:\\png\\Logo.png";
             // 生成上传后的文件名（你可以自定义，也可以加时间戳防止重复）
-            String objectName = "test/Logo.png";
+            String objectName = "Thisisatest/Logo.png";
 
             // 读取文件为 InputStream
             InputStream inputStream = new FileInputStream(localFilePath);

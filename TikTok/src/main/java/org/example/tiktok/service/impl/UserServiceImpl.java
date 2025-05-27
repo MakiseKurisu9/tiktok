@@ -181,6 +181,7 @@ public class UserServiceImpl implements LoginService {
         user.setPassword(password);
         user.setEmail(email);
         user.setAvatarSource(null);
+        user.setSex("unknown");
         return user;
     }
 

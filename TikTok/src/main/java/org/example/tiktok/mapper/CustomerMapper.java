@@ -1,6 +1,7 @@
 package org.example.tiktok.mapper;
 
 import org.apache.ibatis.annotations.*;
+import org.example.tiktok.dto.FollowersDTO;
 import org.example.tiktok.entity.User.Favourite;
 import org.example.tiktok.entity.User.User;
 import org.example.tiktok.entity.Video.VideoType;
@@ -35,11 +36,20 @@ public interface CustomerMapper {
     void subscribeVideoTypes(@Param("userId") Long userId,@Param("typeIds") List<Long> typeIds);
 
     //返回的是订阅的视频分类id
-    @Select("select * from subscribe_video_type where user_id = #{userId}")
+    @Select("select video_type_id from subscribe_video_type where user_id = #{userId}")
     List<Long> getSubscribeByUserId(Long userId);
 
     List<VideoType> getVideoTypesByIds(@Param("ids") List<Long> videoTypeId);
 
     @Select("select * from user where id = #{userId}")
     User getUserByUserId(Long userId);
+
+    @Select("select follower_id from follow where follow_id = #{followId}")
+    List<Long> getFollowers(Long followId);
+
+    List<FollowersDTO> getFollowersInfo(@Param("ids") List<Long> followersId);
+
+    @Update("update user set nickname=#{nickName},avatar_source=#{avatarSource}," +
+            "sex=#{sex},user_description=#{userDescription} where id = #{Id}")
+    void updateUserInfo(User user);
 }

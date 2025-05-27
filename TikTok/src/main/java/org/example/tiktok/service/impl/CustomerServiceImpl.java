@@ -2,6 +2,7 @@ package org.example.tiktok.service.impl;
 
 import jakarta.annotation.Resource;
 import org.example.tiktok.dto.FavouriteDTO;
+import org.example.tiktok.dto.FollowersDTO;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.User.Favourite;
 import org.example.tiktok.entity.User.User;
@@ -127,6 +128,28 @@ public class CustomerServiceImpl implements CustomerService {
             return Result.fail("cannot find this user");
         }
         return Result.ok("successfully get user",user);
+    }
+
+    @Override
+    public Result getFollowers() {
+        Long userId = UserHolder.getUser().getId();
+        List<Long> followers = customerMapper.getFollowers(userId);
+        if(followers == null || followers.isEmpty()) {
+            return Result.ok("this user do not have any followers",Collections.emptyList());
+        }
+        List<FollowersDTO> followersInfo = customerMapper.getFollowersInfo(followers);
+        return Result.ok("successfully get followers",followersInfo);
+    }
+
+    @Override
+    public Result updateUserInfo(String nickName, String avatarSource, String sex, String userDescription) {
+        User user = new User();
+        user.setNickname(nickName);
+        user.setUserDescription(userDescription);
+        user.setSex(sex);
+        user.setAvatarSource(avatarSource);
+        customerMapper.updateUserInfo(user);
+        return Result.ok("successfully update user info",user);
     }
 
 

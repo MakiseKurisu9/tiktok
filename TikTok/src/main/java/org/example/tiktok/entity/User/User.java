@@ -19,6 +19,7 @@ public class User extends BaseEntity {
     private String userDescription;
 
     private String avatarSource;
-
+    //unknown female male
+    private String sex;
 }
 
