@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FindPasswordDTO {
-    String email;
-    String code;
-    String newPassword;
+    private String email;
+    private String code;
+    private String newPassword;
 }

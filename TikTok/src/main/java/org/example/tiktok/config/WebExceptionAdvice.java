@@ -11,7 +11,6 @@ public class WebExceptionAdvice {
 
     @ExceptionHandler
     public Result handleRunTimeException(RuntimeException e) {
-        log.error(e.toString(),e);
         return Result.fail(e.getMessage());
     }
 

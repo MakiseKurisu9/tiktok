@@ -1,10 +1,7 @@
 package org.example.tiktok.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -29,7 +26,7 @@ public class Result {
     public static Result ok(String message,Object data) {
         return new Result(true,message,data,null);
     }
-    public static Result ok(List<?> data, Long total) { return new Result(true,null,data,total);}
+    //pageBean public static Result ok(List<?> data, Long total) { return new Result(true,null,data,total);}
     public static Result fail(String message) {
         return new Result(false, message, null,null);
     }

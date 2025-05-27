@@ -2,6 +2,7 @@ package org.example.tiktok.mapper;
 
 import org.apache.ibatis.annotations.*;
 import org.example.tiktok.entity.User.Favourite;
+import org.example.tiktok.entity.User.User;
 import org.example.tiktok.entity.Video.VideoType;
 
 import java.util.List;
@@ -38,4 +39,7 @@ public interface CustomerMapper {
     List<Long> getSubscribeByUserId(Long userId);
 
     List<VideoType> getVideoTypesByIds(@Param("ids") List<Long> videoTypeId);
+
+    @Select("select * from user where id = #{userId}")
+    User getUserByUserId(Long userId);
 }

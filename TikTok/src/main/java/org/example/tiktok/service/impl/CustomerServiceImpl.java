@@ -4,23 +4,31 @@ import jakarta.annotation.Resource;
 import org.example.tiktok.dto.FavouriteDTO;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.User.Favourite;
+import org.example.tiktok.entity.User.User;
 import org.example.tiktok.entity.Video.VideoType;
 import org.example.tiktok.mapper.CustomerMapper;
 import org.example.tiktok.service.CustomerService;
+import org.example.tiktok.utils.AliOSSUtil;
 import org.example.tiktok.utils.UserHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
     @Resource
     CustomerMapper customerMapper;
+
+    @Resource
+    AliOSSUtil aliOSSUtil;
 
     @Override
     public Result getCustomerFavourite() {
@@ -102,6 +110,23 @@ public class CustomerServiceImpl implements CustomerService {
         }
         List<VideoType> videoTypes = customerMapper.getVideoTypesByIds(subscribedVideoTypes);
         return Result.ok("successfully get subscribe videoType",videoTypes);
+    }
+
+    @Override
+    public Result uploadAvatar(MultipartFile file) throws IOException {
+        String originalFileName = file.getOriginalFilename();
+        String filename = UUID.randomUUID() + originalFileName.substring(originalFileName.lastIndexOf("."));
+        String url = aliOSSUtil.uploadFile(filename,file.getInputStream());
+        return Result.ok("successfully upload file",url);
+    }
+
+    @Override
+    public Result getUserInfoByUserId(Long userId) {
+        User user = customerMapper.getUserByUserId(userId);
+        if(user == null) {
+            return Result.fail("cannot find this user");
+        }
+        return Result.ok("successfully get user",user);
     }
 
 

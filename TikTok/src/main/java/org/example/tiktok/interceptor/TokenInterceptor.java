@@ -12,9 +12,7 @@ import org.example.tiktok.utils.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.example.tiktok.utils.SystemConstant.TOKEN_EXPIRE;
@@ -36,7 +34,7 @@ public class TokenInterceptor implements HandlerInterceptor {
         String token = request.getHeader("Authorization");
 
         if(StringUtils.isEmpty(token)) {
-            log.debug("No token provided, allowing access for public paths");
+            log.debug("token is empty");
             return true;
         }
 
@@ -45,14 +43,14 @@ public class TokenInterceptor implements HandlerInterceptor {
 
             Long userId = claims.get("id", Long.class);
             if (userId == null) {
-                log.debug("invalid token, userId is null");
+                log.debug("cannot find userId");
                 return true;
             }
             String key = TOKEN_PREFIX + userId;
             //is token expire or wrong
             String tokenRedis = stringRedisTemplate.opsForValue().get(key);
             if (tokenRedis == null || !token.equals(tokenRedis)) {
-                log.debug("token wrong or expire");
+                log.debug("tokenRedis is null or wrong");
                 return true;
             }
 
@@ -60,12 +58,15 @@ public class TokenInterceptor implements HandlerInterceptor {
 
             String nickname = claims.get("nickname", String.class);
             String email = claims.getSubject();
-            UserDTO userDTO = new UserDTO(userId, nickname, email);
-            UserHolder.saveUser(userDTO);
+
+            if(nickname != null && email != null && userId != null) {
+                UserDTO userDTO = new UserDTO(userId,nickname,email);
+                UserHolder.saveUser(userDTO);
+            }
             return true;
         } catch (Exception e) {
             //出现异常不影响访问公共api
-            log.debug("failed to parse token" + e.getMessage());
+            log.debug("exception!!!");
         }
         return true;
 

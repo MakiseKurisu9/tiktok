@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmailCodeDTO {
-    String uuid;
-    String code;
-    String email;
+    private String uuid;
+    private String code;
+    private String email;
 }

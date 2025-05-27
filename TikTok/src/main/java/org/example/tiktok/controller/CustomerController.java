@@ -5,6 +5,9 @@ import org.example.tiktok.dto.FavouriteDTO;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.service.CustomerService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 
 @RestController
@@ -51,6 +54,15 @@ public class CustomerController {
         return customerService.getSubscribeByUserId();
     }
 
+    @PostMapping("/upload/avatar")
+    public Result uploadAvatar(MultipartFile file) throws IOException {
+        return customerService.uploadAvatar(file);
+    }
+
+    @GetMapping("/getInfo/{userId}")
+    public Result getUserInfoByUserId(@PathVariable Long userId) {
+        return customerService.getUserInfoByUserId(userId);
+    }
 
 
 }
