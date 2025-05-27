@@ -39,7 +39,7 @@ class TikTokApplicationTests {
 
             // 调用上传方法
             String url = aliOSSUtil.uploadFile(objectName, inputStream);
-
+            System.out.println("hello");
             System.out.println("上传成功！访问地址：" + url);
 
         } catch (Exception e) {
