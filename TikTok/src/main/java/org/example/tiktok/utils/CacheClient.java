@@ -50,6 +50,7 @@ public class CacheClient {
         if(StringUtils.isNotBlank(json)) {
             return objectMapper.readValue(json,type);
         }
+        //空值
         if(json != null) {
             return null;
         }

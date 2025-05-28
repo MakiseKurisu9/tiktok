@@ -20,4 +20,6 @@ public interface IndexService {
     Result searchVideoHistory();
 
     Result deleteSearchHistory(String searchName);
+
+    Result getUserPublishVideos(int page, int limit, Long userId) throws JsonProcessingException;
 }

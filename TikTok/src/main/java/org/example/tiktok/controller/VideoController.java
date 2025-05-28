@@ -42,7 +42,7 @@ public class VideoController {
     @DeleteMapping("/delete/{videoId}")
     public Result delVideo(@PathVariable Long videoId) { return videoService.deleteVideo(videoId);}
 
-    //获取某人发布的所有视频
+    //查询用户所管理的视频
     @GetMapping
     public Result listVideos(
             @RequestParam(defaultValue = "1") Integer page,
@@ -50,6 +50,7 @@ public class VideoController {
     ) {
         return videoService.listVideos(page,limit);
     }
+
 
 
 

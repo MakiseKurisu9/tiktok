@@ -28,4 +28,12 @@ public interface IndexMapper {
 
     @Update("update video set views = video.views + #{views} where id = #{videoId}")
     void addViews(@Param("videoId") Long videoId,@Param("views") Long views);
+
+//    @Select("select * from video where publisher_id = #{userId}")
+//    List<Video> getUserPublishVideos(Long userId);
+    //性能更高
+    @Select("select id from video where publisher_id = #{userId}")
+    List<Long> getUserPublishVideoIds(Long userId);
+
+    List<Video> getVideosByIds(@Param("ids")List<Long> ids);
 }

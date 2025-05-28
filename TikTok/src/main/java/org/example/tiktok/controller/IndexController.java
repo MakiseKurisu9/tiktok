@@ -55,7 +55,6 @@ public class IndexController {
         return indexService.deleteSearchHistory(searchName);
     }
 
-
     //实现思路，参考b站
     //，前端弹出toast提供一个剪贴板，提示点击获取连接，同时share+1，方便hotRank进行排序
     @PostMapping("/share/{videoId}")
@@ -64,5 +63,14 @@ public class IndexController {
         return indexService.shareVideo(videoId,request);
     }
 
+    //查看用户 自己或别人发布的视频, 也可以理解为看别人主页
+    @GetMapping("/video/user")
+    public Result getUserPublishVideos(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam Long userId
+    ) {
+        return indexService.getUserPublishVideos(page,limit,userId);
+    }
 
 }

@@ -20,9 +20,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -163,6 +161,65 @@ public class IndexServiceImpl implements IndexService {
             return Result.fail("cannot delete searchName");
         }
         return Result.ok("successfully delete searchName");
+    }
+
+    @Override
+    public Result getUserPublishVideos(int page, int limit, Long userId) throws JsonProcessingException {
+        //保持顺序
+        Map<Long,Video> videoMap = new HashMap<>();
+
+        PageHelper.startPage(page,limit);
+        //查id而不是 * 性能更好
+        List<Long> ids = indexMapper.getUserPublishVideoIds(userId);
+        if(ids == null || ids.isEmpty()) {
+            return Result.ok("this user do not publish any videos",Collections.emptyList());
+        }
+        //构造redis key
+        List<String> keys = ids.stream()
+                .map(id -> "index:video:"+ id)
+                .toList();
+        //mget   like video1 video2 null video3 "" video4
+        List<String> jsonList = stringRedisTemplate.opsForValue().multiGet(keys);
+
+        List<Long> missingIds = new ArrayList<>();
+
+        for (int i = 0; i < jsonList.size(); i++) {
+            String json = jsonList.get(i);
+            Long id = ids.get(i);
+            if(json != null && !json.isBlank()) {
+                Video video = objectMapper.readValue(json, Video.class);
+                videoMap.put(id,video);
+            } else {
+                missingIds.add(id);
+            }
+        }
+        //查询数据库
+        if(!missingIds.isEmpty()) {
+            List<Video> videoDB = indexMapper.getVideosByIds(missingIds);
+            for(Video video : videoDB) {
+                if (video != null) {
+                    videoMap.put(video.getId(),video);
+                    cacheClient.set("index:video:" + video.getId(),video,2L,TimeUnit.HOURS);
+                }
+            }
+        }
+        //正常情况下 所有id都会在map中
+        for(Long id : ids) {
+            if(!videoMap.containsKey(id)) {
+                cacheClient.set("index:video:"+id,"",2L,TimeUnit.HOURS);
+            }
+        }
+        //保持顺序
+        List<Video> videos = ids.stream()
+                .map(videoMap :: get)
+                .filter(Objects::nonNull)
+                .toList();
+
+        PageBean<Video> pageBean = new PageBean<>();
+        PageInfo<Long> pageInfo = new PageInfo<>(ids);
+        pageBean.setItems(videos);
+        pageBean.setTotal(pageInfo.getTotal());
+        return Result.ok("successfully get videos by this user",pageBean);
     }
 
     @Override

@@ -137,7 +137,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Result getUserInfoByUserId(Long userId) throws JsonProcessingException {
         String keyPrefix = "customer:user:";
-        User user = cacheClient.queryWithLogicalExpire(
+        User user = cacheClient.queryWithPassThrough(
                 keyPrefix,
                 userId,
                 User.class,

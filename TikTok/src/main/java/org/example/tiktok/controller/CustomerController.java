@@ -65,7 +65,6 @@ public class CustomerController {
         return customerService.getUserInfoByUserId(userId);
     }
 
-
     @PutMapping
     public Result updateUserInfo(String nickName,String avatarSource,
                                  String sex, String userDescription) throws JsonProcessingException {
