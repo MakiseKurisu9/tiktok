@@ -110,10 +110,6 @@ public class IndexServiceImpl implements IndexService {
 
 
 
-
-
-
-
     @Override
     public Result searchVideo(String searchName, Integer page, Integer limit) {
         PageBean<Video> pageResult = new PageBean<>();

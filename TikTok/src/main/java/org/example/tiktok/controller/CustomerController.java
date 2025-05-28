@@ -1,5 +1,6 @@
 package org.example.tiktok.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Resource;
 import org.example.tiktok.dto.FavouriteDTO;
 import org.example.tiktok.entity.Result;
@@ -60,14 +61,14 @@ public class CustomerController {
     }
 
     @GetMapping("/getInfo/{userId}")
-    public Result getUserInfoByUserId(@PathVariable Long userId) {
+    public Result getUserInfoByUserId(@PathVariable Long userId) throws JsonProcessingException {
         return customerService.getUserInfoByUserId(userId);
     }
 
 
     @PutMapping
     public Result updateUserInfo(String nickName,String avatarSource,
-                                 String sex, String userDescription) {
+                                 String sex, String userDescription) throws JsonProcessingException {
         return customerService.updateUserInfo(nickName,avatarSource,sex,userDescription);
     }
 

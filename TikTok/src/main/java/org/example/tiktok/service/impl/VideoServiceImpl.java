@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.example.tiktok.utils.SystemConstant.History_PREFIX;
-import static org.example.tiktok.utils.SystemConstant.SINGLE_VIDEO_PREFIX;
 
 @Service
 public class VideoServiceImpl implements VideoService {
@@ -133,7 +132,7 @@ public class VideoServiceImpl implements VideoService {
         videoMapper.deleteVideoTypeRelations(videoId);
         Boolean isSuccess = videoMapper.deleteVideo(videoId);
         if(BooleanUtils.isTrue(isSuccess)) {
-            stringRedisTemplate.delete(SINGLE_VIDEO_PREFIX+videoId);//maybe exist cache in redis
+            stringRedisTemplate.delete("index:video:"+videoId);//maybe exist cache in redis
             return Result.ok("successfully delete video");
         } else {
             return Result.fail("fail to delete video");

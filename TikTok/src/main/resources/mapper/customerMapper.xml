@@ -33,4 +33,26 @@
         </foreach>
     </select>
 
+    <!-- 查询当前用户关注了 targetIds 中哪些人 -->
+    <select id="getFollowingIds" resultType="Long">
+        SELECT follow_id
+        FROM follow
+        WHERE follower_id = #{userId}
+        AND follow_id IN
+        <foreach collection="targetIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!-- 查询 targetIds 中有哪些人关注了当前用户 -->
+    <select id="getFollowersInList" resultType="Long">
+        SELECT follower_id
+        FROM follow
+        WHERE follow_id = #{userId}
+        AND follower_id IN
+        <foreach collection="targetIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>

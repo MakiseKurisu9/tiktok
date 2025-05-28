@@ -67,4 +67,10 @@ public interface CustomerMapper {
 
     @Insert("INSERT INTO follow (follow_id, follower_id) VALUES (#{followUserId}, #{followerId})")
     int follow(@Param("followUserId")Long followUserId,@Param("followerId") Long followerId);
+
+    //查询我关注的人是否关注了我 互关
+    List<Long> getFollowingIds(@Param("userId")Long userId,@Param("targetIds") List<Long> targetIds);
+
+    // 查询关注我的人，我是否关注了 互关
+    List<Long> getFollowersInList(@Param("userId") Long userId, @Param("targetIds") List<Long> targetIds);
 }

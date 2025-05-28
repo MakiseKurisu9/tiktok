@@ -3,7 +3,6 @@ package org.example.tiktok.entity.Video;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.example.tiktok.entity.BaseEntity;
-import org.springframework.data.annotation.Transient;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -46,7 +45,8 @@ public class Video extends BaseEntity {
     //分享次数
     private Long shares;
 
-    @Transient
+    //no need
+
     private Boolean isLiked;
 
 }

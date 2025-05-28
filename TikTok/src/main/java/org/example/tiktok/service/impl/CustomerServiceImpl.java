@@ -24,10 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -179,6 +176,13 @@ public class CustomerServiceImpl implements CustomerService {
         }
         PageHelper.startPage(page,limit);
         List<FollowersDTO> follows = customerMapper.getFollowInfo(followIds);
+
+        List<Long> mutualIds = customerMapper.getFollowersInList(userId,followIds);
+        Set<Long> mutualSet = new HashSet<>(mutualIds);
+        for (FollowersDTO dto : follows) {
+            dto.setEachLike(mutualSet.contains(dto.getId()));
+        }
+
         PageInfo<FollowersDTO> pageInfo = new PageInfo<>(follows);
 
         PageBean<FollowersDTO> pageBean = new PageBean<>();
@@ -196,8 +200,15 @@ public class CustomerServiceImpl implements CustomerService {
         }
         PageHelper.startPage(page,limit);
         List<FollowersDTO> followers = customerMapper.getFollowersInfo(followersId);
-        PageInfo<FollowersDTO> pageInfo = new PageInfo<>(followers);
 
+        //查看是否互关 userId is follow followersDTO.getId()
+        List<Long> mutualIds = customerMapper.getFollowingIds(userId,followersId);
+        Set<Long> mutualSet = new HashSet<>(mutualIds);
+        for (FollowersDTO dto : followers) {
+            dto.setEachLike(mutualSet.contains(dto.getId()));
+        }
+
+        PageInfo<FollowersDTO> pageInfo = new PageInfo<>(followers);
         PageBean<FollowersDTO> pageBean = new PageBean<>();
         pageBean.setTotal(pageInfo.getTotal());
         pageBean.setItems(pageInfo.getList());
