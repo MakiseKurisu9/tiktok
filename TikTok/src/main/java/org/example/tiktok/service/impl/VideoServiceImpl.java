@@ -6,6 +6,7 @@ import jakarta.annotation.Resource;
 import org.apache.commons.lang3.BooleanUtils;
 import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.entity.Result;
+import org.example.tiktok.entity.Video.Comment;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.mapper.VideoMapper;
 import org.example.tiktok.service.VideoService;
@@ -15,6 +16,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -157,6 +159,43 @@ public class VideoServiceImpl implements VideoService {
 
         return Result.ok("successfully get data",pageBean);
 
+    }
+
+    @Override
+    public Result feedPush() {
+        return null;
+    }
+
+    @Override
+    public Result commentOrAnswerComment(Long videoId, Long parentId, String content) {
+        Long userId = UserHolder.getUser().getId();
+        Comment comment = new Comment();
+        comment.setContent(content);
+        comment.setFromUserId(userId);
+        comment.setVideoId(videoId);
+        comment.setCreateTime(LocalDateTime.now());
+        comment.setUpdateTime(LocalDateTime.now());
+        //评论视频，一级评论
+        if(parentId == null) {
+            comment.setParentId(0L);
+            comment.setLikesCount(0);
+            comment.setChildCount(0);
+            videoMapper.addComment(comment);
+            comment.setRootId(comment.getId());
+            videoMapper.updateRootId(comment.getId(),comment.getId());
+        } else {//二级评论 回复评论的评论
+            Comment parentComment = videoMapper.getCommentById(parentId);
+            if(parentComment == null) {
+                return Result.fail("comment dose not exist");
+            }
+            comment.setToUserId(parentComment.getFromUserId());
+            comment.setParentId(parentComment.getId());
+            comment.setRootId(parentComment.getRootId() != null ? parentComment.getRootId() : parentId);
+            videoMapper.addComment(comment);
+
+            videoMapper.addChildCount(parentComment.getId());
+        }
+        return Result.ok("successfully comment",comment);
     }
 
 

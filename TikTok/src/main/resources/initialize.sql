@@ -60,6 +60,21 @@ CREATE TABLE IF NOT EXISTS video (
                                      update_time DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+CREATE TABLE IF NOT EXISTS comment (
+                                       id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                       video_id BIGINT NOT NULL,
+                                       from_user_id BIGINT NOT NULL,
+                                       to_user_id BIGINT,
+                                       content TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                                       parent_id BIGINT,
+                                       root_id BIGINT,
+                                       likes_count INT DEFAULT 0,
+                                       child_count INT DEFAULT 0,
+                                       create_time DATETIME NOT NULL,
+                                       update_time DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Favourite table
 CREATE TABLE IF NOT EXISTS favourite (
                                          id BIGINT PRIMARY KEY AUTO_INCREMENT,

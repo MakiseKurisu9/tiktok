@@ -18,4 +18,8 @@ public interface VideoService {
     Result deleteVideo(Long videoId);
 
     Result listVideos(Integer page,Integer limit);
+
+    Result feedPush();
+
+    Result commentOrAnswerComment(Long videoId, Long parentId, String comment);
 }

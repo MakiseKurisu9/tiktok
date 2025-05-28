@@ -69,7 +69,7 @@ public class IndexController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit,
             @RequestParam Long userId
-    ) {
+    ) throws JsonProcessingException {
         return indexService.getUserPublishVideos(page,limit,userId);
     }
 

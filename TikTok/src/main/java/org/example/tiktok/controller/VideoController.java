@@ -51,6 +51,26 @@ public class VideoController {
         return videoService.listVideos(page,limit);
     }
 
+    //max 当前时间戳 || 上一次查询的最小时间戳
+    //offset 偏移量
+    //数据动态变化，记录上一次看的id来进行分页
+    @GetMapping("/follow/feed")
+    public Result feedPush(
+            @RequestParam("lastId") Long max,
+            @RequestParam(value = "offset", defaultValue = "0") Integer offset
+    ) {
+        return videoService.feedPush();
+    }
+
+    @PostMapping("/comment")
+    public Result commentOrAnswerComment(
+            @RequestParam Long videoId,
+            @RequestParam(required = false) Long parentId,
+            @RequestParam String content
+    ) {
+        return videoService.commentOrAnswerComment(videoId,parentId, content);
+    }
+
 
 
 

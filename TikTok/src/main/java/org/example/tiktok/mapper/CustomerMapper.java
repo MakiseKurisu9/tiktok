@@ -44,9 +44,9 @@ public interface CustomerMapper {
     @Select("select * from user where id = #{userId}")
     User getUserByUserId(Long userId);
 
-    @Update("update user set nickname=#{nickName},avatar_source=#{avatarSource}," +
+    @Update("update user set nickname=#{nickname},avatar_source=#{avatarSource}," +
             "sex=#{sex},user_description=#{userDescription},create_time=NOW()" +
-            " where id = #{Id}")
+            " where id = #{id}")
     void updateUserInfo(User user);
 
     @Select("select follow.follow_id from follow where follower_id = #{userId}")

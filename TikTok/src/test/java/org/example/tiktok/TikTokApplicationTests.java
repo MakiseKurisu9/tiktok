@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import org.example.tiktok.dto.EmailCodeDTO;
 import org.example.tiktok.service.LoginService;
 import org.example.tiktok.utils.AliOSSUtil;
+import org.example.tiktok.utils.SnowflakeIdWorker;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -18,6 +19,9 @@ class TikTokApplicationTests {
 
     @Resource
     AliOSSUtil aliOSSUtil;
+
+    @Resource
+    SnowflakeIdWorker snowflakeIdWorker;
 
     @Test
     void testMail() {
@@ -45,6 +49,12 @@ class TikTokApplicationTests {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    @Test
+    public void testSnow() {
+        System.out.println(snowflakeIdWorker.nextId());
+        System.out.println(snowflakeIdWorker.nextId());
+
     }
 
 

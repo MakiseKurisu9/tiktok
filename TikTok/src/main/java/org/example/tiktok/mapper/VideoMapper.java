@@ -1,6 +1,7 @@
 package org.example.tiktok.mapper;
 
 import org.apache.ibatis.annotations.*;
+import org.example.tiktok.entity.Video.Comment;
 import org.example.tiktok.entity.Video.Video;
 
 import java.util.List;
@@ -46,4 +47,17 @@ public interface VideoMapper {
     @Select("select * from video where publisher_id = #{userId}")
     List<Video> getVideosByUserId(@Param("userId") Long userId);
 
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    @Insert("insert into comment(video_id, from_user_id, to_user_id, content, parent_id, root_id, likes_count, child_count, create_time, update_time) " +
+            "VALUES (#{videoId},#{fromUserId},#{toUserId},#{content},#{parentId},#{rootId},#{likesCount},#{childCount},NOW(),NOW())")
+    void addComment(Comment comment);
+
+    @Select("select * from comment where id = #{id}")
+    Comment getCommentById(Long id);
+
+    @Update("update comment set child_count = child_count + 1 where id = #{id}")
+    void addChildCount(Long id);
+
+    @Update("update comment set root_id = #{rootId} where id = #{id}")
+    void updateRootId(@Param("id") Long id,@Param("rootId") Long rootId);
 }
