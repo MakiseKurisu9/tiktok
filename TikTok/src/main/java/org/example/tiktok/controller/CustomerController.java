@@ -90,5 +90,9 @@ public class CustomerController {
         return customerService.followUser(followUserId,isFollow);
     }
 
+    /*todo*/
+    //可能做共同查看共同关注 用set求个交集
+
+
 
 }

@@ -3,12 +3,9 @@ package org.example.tiktok.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.service.IndexService;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.http.HttpRequest;
 
 @RestController
 @RequestMapping("/index")
@@ -47,6 +44,19 @@ public class IndexController {
     ){
         return indexService.searchVideo(searchName,page,limit);
     }
+
+    @GetMapping("/search/history")
+    public Result searchVideoHistory() {
+        return indexService.searchVideoHistory();
+    }
+
+    @PostMapping("/search/history/delete")
+    public Result deleteSearchHistory(@RequestParam String searchName) {
+        return indexService.deleteSearchHistory(searchName);
+    }
+
+
+
 
     //实现思路，参考b站
     //，前端弹出toast提供一个剪贴板，提示点击获取连接，同时share+1，方便hotRank进行排序

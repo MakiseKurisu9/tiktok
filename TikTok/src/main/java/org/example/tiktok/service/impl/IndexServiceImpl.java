@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -91,9 +92,24 @@ public class IndexServiceImpl implements IndexService {
         return Result.ok("success get video",video);
     }
 
+
     @Override
     public Result searchVideo(String searchName, Integer page, Integer limit) {
         PageBean<Video> pageResult = new PageBean<>();
+        //搜索框输入非空判断 前端进行
+        Long userId = UserHolder.getUser().getId();
+        String key = "search:history:" + userId;
+        long now = System.currentTimeMillis();
+
+        stringRedisTemplate.opsForZSet().add(key,searchName,now);
+        //过期时间七天
+        stringRedisTemplate.expire(key,7,TimeUnit.DAYS);
+        //get number of members in zSet
+        Long size = stringRedisTemplate.opsForZSet().zCard(key);
+        if(size != null && size > 10) {
+            //从小到大排，只保留最近的十个
+            stringRedisTemplate.opsForZSet().removeRange(key,0,size - 11);
+        }
 
         PageHelper.startPage(page,limit);
         List<Video> videos = indexMapper.searchVideo(searchName);
@@ -111,6 +127,28 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
+    public Result searchVideoHistory() {
+        Long userId = UserHolder.getUser().getId();
+        String key = "search:history:" + userId;
+        Set<String> result = stringRedisTemplate.opsForZSet().reverseRange(key, 0, 9);
+        if( result== null ||result.isEmpty()) {
+            return Result.ok("there is no searchName",Collections.emptySet());
+        }
+        return Result.ok("successfully get history data",result);
+    }
+
+    @Override
+    public Result deleteSearchHistory(String searchName) {
+        Long userId = UserHolder.getUser().getId();
+        String key = "search:history:" + userId;
+        Long isSuccess = stringRedisTemplate.opsForZSet().remove(key, searchName);
+        if(isSuccess <= 0 ) {
+            return Result.fail("cannot delete searchName");
+        }
+        return Result.ok("successfully delete searchName");
+    }
+
+    @Override
     @Transactional
     public Result shareVideo(Long videoId, HttpServletRequest request) {
         String ip = getClientRealIp(request);
@@ -124,6 +162,8 @@ public class IndexServiceImpl implements IndexService {
         String shareUrl = "http://" + serverName + ":" +serverPort + "/video/" + videoId;
         return Result.ok("share successfully",shareUrl);
     }
+
+
 
     private String getClientRealIp(HttpServletRequest request) {
         //记录代理ip
