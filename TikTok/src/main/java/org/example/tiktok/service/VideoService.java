@@ -22,4 +22,8 @@ public interface VideoService {
     Result feedPush();
 
     Result commentOrAnswerComment(Long videoId, Long parentId, String comment);
+
+    Result getCommentByVideoId(int page, int limit, Long videoId);
+
+    Result likeComment(Long commentId);
 }

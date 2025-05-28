@@ -1,6 +1,7 @@
 package org.example.tiktok.mapper;
 
 import org.apache.ibatis.annotations.*;
+import org.example.tiktok.entity.User.User;
 import org.example.tiktok.entity.Video.Comment;
 import org.example.tiktok.entity.Video.Video;
 
@@ -60,4 +61,16 @@ public interface VideoMapper {
 
     @Update("update comment set root_id = #{rootId} where id = #{id}")
     void updateRootId(@Param("id") Long id,@Param("rootId") Long rootId);
+
+    @Select("select * from comment where video_id = #{videoId} and parent_id = 0 order by create_time desc")
+    List<Comment> getRootCommentsByVideoId(Long videoId);
+
+    @Select("select * from user where id = #{fromUserId}")
+    User getUserById(Long fromUserId);
+
+    @Update("update comment set likes_count = likes_count + 1 where id = #{commentId}")
+    Boolean likeComment(Long commentId);
+
+    @Update("update comment set likes_count = likes_count - 1 where id = #{commentId}")
+    Boolean unlikeComment(Long commentId);
 }

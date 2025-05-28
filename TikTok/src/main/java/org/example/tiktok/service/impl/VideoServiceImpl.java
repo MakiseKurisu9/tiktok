@@ -6,6 +6,7 @@ import jakarta.annotation.Resource;
 import org.apache.commons.lang3.BooleanUtils;
 import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.entity.Result;
+import org.example.tiktok.entity.User.User;
 import org.example.tiktok.entity.Video.Comment;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.mapper.VideoMapper;
@@ -196,6 +197,49 @@ public class VideoServiceImpl implements VideoService {
             videoMapper.addChildCount(parentComment.getId());
         }
         return Result.ok("successfully comment",comment);
+    }
+
+    @Override
+    public Result getCommentByVideoId(int page, int limit, Long videoId) {
+        PageHelper.startPage(page,limit);
+        List<Comment> comments = videoMapper.getRootCommentsByVideoId(videoId);
+        if(comments == null || comments.isEmpty()) {
+            return Result.ok("there is no comment",Collections.emptyList());
+        }
+        //可优化 先查id 再通过id查缓存 再查不在id中的user indexService中实现过了
+        for(Comment comment : comments) {
+            User user = videoMapper.getUserById(comment.getFromUserId());
+            comment.setUser(user);
+        }
+
+        PageInfo<Comment> pageInfo = new PageInfo<>(comments);
+
+        PageBean<Comment> pageBean = new PageBean<>();
+        pageBean.setTotal(pageInfo.getTotal());
+        pageBean.setItems(pageInfo.getList());
+        return Result.ok("successfully get comment in this video",pageBean);
+    }
+
+    @Override
+    public Result likeComment(Long commentId) {
+        Long userId = UserHolder.getUser().getId();
+        String key = "comment:liked:" + commentId;
+
+        Boolean member = stringRedisTemplate.opsForSet().isMember(key,userId.toString());
+        if(BooleanUtils.isFalse(member)) {
+            Boolean isLikeSuccess = videoMapper.likeComment(commentId);
+            if(isLikeSuccess) {
+                stringRedisTemplate.opsForSet().add(key,userId.toString());
+                return Result.ok("like success");
+            }
+        } else {
+            Boolean isUnLikeSuccess = videoMapper.unlikeComment(commentId);
+            if(isUnLikeSuccess) {
+                stringRedisTemplate.opsForSet().remove(key,userId.toString());
+                return Result.ok("unlike success");
+            }
+        }
+        return Result.fail("like/unlike not affect");
     }
 
 

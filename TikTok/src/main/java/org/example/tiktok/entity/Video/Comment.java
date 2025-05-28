@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.example.tiktok.entity.BaseEntity;
+import org.example.tiktok.entity.User.User;
+
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = false)
 @Data
@@ -24,4 +27,7 @@ public class Comment extends BaseEntity {
     //喜欢数量 子评论数量
     private Integer likesCount;
     private Integer childCount;
+    //exist = false
+    private User user;
+    private List<Comment> comments;
 }

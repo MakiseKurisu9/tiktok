@@ -71,6 +71,22 @@ public class VideoController {
         return videoService.commentOrAnswerComment(videoId,parentId, content);
     }
 
+    @GetMapping("/index/comment/by/video")
+    public Result getCommentByVideoId(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int limit,
+            @RequestParam Long videoId
+    ) {
+        return videoService.getCommentByVideoId(page,limit,videoId);
+    }
+
+    @PostMapping("/comment/like/{commentId}")
+    public Result likeComment(
+            @PathVariable Long commentId
+    ) {
+        return videoService.likeComment(commentId);
+    }
+
 
 
 

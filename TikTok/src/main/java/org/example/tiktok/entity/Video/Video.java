@@ -45,6 +45,9 @@ public class Video extends BaseEntity {
     //分享次数
     private Long shares;
 
+    //评论次数
+    private Long comments;
+
     //no need
 
     private Boolean isLiked;
