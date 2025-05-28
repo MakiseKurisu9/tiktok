@@ -1,9 +1,6 @@
 package org.example.tiktok.mapper;
 
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 import org.example.tiktok.entity.User.User;
 
 @Mapper
@@ -17,5 +14,5 @@ public interface LoginMapper {
     User getUserByEmail(String email);
 
     @Update("update user set password = #{newPassword} where email = #{email}")
-    void changePassword(String newPassword, String email);
+    void changePassword(@Param("newPassword")String newPassword,@Param("email") String email);
 }

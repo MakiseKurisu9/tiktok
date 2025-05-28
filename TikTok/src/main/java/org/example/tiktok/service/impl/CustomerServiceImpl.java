@@ -1,5 +1,7 @@
 package org.example.tiktok.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
@@ -13,6 +15,7 @@ import org.example.tiktok.entity.Video.VideoType;
 import org.example.tiktok.mapper.CustomerMapper;
 import org.example.tiktok.service.CustomerService;
 import org.example.tiktok.utils.AliOSSUtil;
+import org.example.tiktok.utils.CacheClient;
 import org.example.tiktok.utils.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -37,6 +41,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Resource
     AliOSSUtil aliOSSUtil;
+
+    @Resource
+    CacheClient cacheClient;
+
+    private final static ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public Result getCustomerFavourite() {
@@ -129,8 +138,15 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Result getUserInfoByUserId(Long userId) {
-        User user = customerMapper.getUserByUserId(userId);
+    public Result getUserInfoByUserId(Long userId) throws JsonProcessingException {
+        String keyPrefix = "customer:user:";
+        User user = cacheClient.queryWithLogicalExpire(
+                keyPrefix,
+                userId,
+                User.class,
+                id1 -> customerMapper.getUserByUserId(id1),
+                2L,
+                TimeUnit.HOURS);
         if(user == null) {
             return Result.fail("cannot find this user");
         }
@@ -138,13 +154,18 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Result updateUserInfo(String nickName, String avatarSource, String sex, String userDescription) {
+    public Result updateUserInfo(String nickName, String avatarSource, String sex, String userDescription) throws JsonProcessingException {
+        Long userId = UserHolder.getUser().getId();
+        String key = "customer:user:" + userId;
         User user = new User();
+        user.setId(userId);
         user.setNickname(nickName);
         user.setUserDescription(userDescription);
         user.setSex(sex);
         user.setAvatarSource(avatarSource);
         customerMapper.updateUserInfo(user);
+        stringRedisTemplate.delete(key);
+        cacheClient.set(key,user,2L,TimeUnit.HOURS);
         return Result.ok("successfully update user info",user);
     }
 

@@ -21,8 +21,11 @@ public interface IndexMapper {
     List<Video> searchVideo(@Param("searchName") String searchName);
 
     @Insert("insert into video_share(share_user_id, ip, video_id) values (#{shareUserId},#{ip},#{videoId})")
-    void shareVideo(Long shareUserId,String ip, Long videoId);
+    void shareVideo(@Param("shareUserId") Long shareUserId,@Param("ip") String ip,@Param("videoId") Long videoId);
 
     @Update("update video set shares = shares + 1 where id = #{videoId}")
     void updateVideoShare(Long videoId);
+
+    @Update("update video set views = video.views + #{views} where id = #{videoId}")
+    void addViews(@Param("videoId") Long videoId,@Param("views") Long views);
 }

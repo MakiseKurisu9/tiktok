@@ -6,16 +6,17 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.entity.Video.VideoType;
 import org.example.tiktok.mapper.IndexMapper;
 import org.example.tiktok.service.IndexService;
+import org.example.tiktok.utils.CacheClient;
 import org.example.tiktok.utils.PublicVideoServiceUtil;
 import org.example.tiktok.utils.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,14 +26,14 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.example.tiktok.utils.SystemConstant.CACHE_VIDEO_SAVE;
-import static org.example.tiktok.utils.SystemConstant.NULL_VALUE_SAVE;
-
 @Service
 public class IndexServiceImpl implements IndexService {
 
     @Resource
     IndexMapper indexMapper;
+
+    @Resource
+    CacheClient cacheClient;
 
     @Resource
     StringRedisTemplate stringRedisTemplate;
@@ -66,31 +67,51 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public Result getVideoById(Long videoId) throws JsonProcessingException {
-        String key = "index:video:" + videoId;
-        String videoJson = stringRedisTemplate.opsForValue().get(key);
-        //缓存命中不是空值
-        if(!StringUtils.isBlank(videoJson)) {
-            Video video = objectMapper.readValue(videoJson, Video.class);
-            publicVideoServiceUtil.isStared(video);
-            return Result.ok("success get video",video);
+        String keyPrefix = "index:video:";
+        Video video = cacheClient.queryWithPassThrough(
+                keyPrefix,
+                videoId,
+                Video.class,
+                videoId1 -> indexMapper.getVideoById(videoId1),
+                2L,
+                TimeUnit.HOURS
+        );
+        if(video == null) {
+            return Result.fail("cannot find this video");
         }
-        //判断空值
-        if(videoJson.isEmpty()) {
-            return Result.fail("not find video");
-        }
-        //get data from db
-        Video video = indexMapper.getVideoById(videoId);
-
-        if(video != null) {
-            String video2Json = objectMapper.writeValueAsString(video);
-            stringRedisTemplate.opsForValue().set(key,video2Json,CACHE_VIDEO_SAVE,TimeUnit.HOURS);
-        } else {
-            stringRedisTemplate.opsForValue().set(key,"",NULL_VALUE_SAVE, TimeUnit.MINUTES);
-            return Result.fail("not find video");
-        }
+        //增加浏览次数
+        stringRedisTemplate.opsForValue().increment("video:views:"+ videoId);
         publicVideoServiceUtil.isStared(video);
         return Result.ok("success get video",video);
     }
+
+    @Scheduled(fixedRate = 5 * 60 * 1000)
+    private void syncViewsToDb() {
+        //get all key
+        Set<String> keys = stringRedisTemplate.keys("video:views:*");
+        if(keys == null || keys.isEmpty()) {
+            return ;
+        }
+        for(String key : keys) {
+            //get videoId
+            String idString = key.substring("video:views:".length());
+            Long videoId = Long.parseLong(idString);
+
+            String count = stringRedisTemplate.opsForValue().get("video:views" + videoId);
+            if( count == null ) continue;
+            Long views = Long.parseLong(count);
+
+            indexMapper.addViews(videoId,views);
+
+            stringRedisTemplate.delete(key);
+        }
+
+    }
+
+
+
+
+
 
 
     @Override

@@ -1,5 +1,6 @@
 package org.example.tiktok.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.example.tiktok.dto.FavouriteDTO;
 import org.example.tiktok.entity.Result;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,11 +22,11 @@ public interface CustomerService {
 
     Result uploadAvatar(MultipartFile file) throws IOException;
 
-    Result getUserInfoByUserId(Long userId);
+    Result getUserInfoByUserId(Long userId) throws JsonProcessingException;
 
 
 
-    Result updateUserInfo(String nickName, String avatarSource, String sex, String userDescription);
+    Result updateUserInfo(String nickName, String avatarSource, String sex, String userDescription) throws JsonProcessingException;
 
     Result getFollow(Integer page, Integer limit);
 

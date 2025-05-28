@@ -60,11 +60,11 @@ public interface CustomerMapper {
     List<FollowersDTO> getFollowersInfo(@Param("ids") List<Long> followersId);
 
     @Select("select count(*) from follow where follow_id =#{followUserId} and follower_id = #{followerId}")
-    int isFollow(Long followUserId,Long followerId);
+    int isFollow(@Param("followUserId") Long followUserId,@Param("followerId") Long followerId);
 
     @Delete("delete from follow where follow_id =#{followUserId} and follower_id = #{followerId}")
-    int unFollow(Long followUserId, Long followerId);
+    int unFollow(@Param("followUserId")Long followUserId,@Param("followerId") Long followerId);
 
     @Insert("INSERT INTO follow (follow_id, follower_id) VALUES (#{followUserId}, #{followerId})")
-    int follow(Long followUserId, Long followerId);
+    int follow(@Param("followUserId")Long followUserId,@Param("followerId") Long followerId);
 }
