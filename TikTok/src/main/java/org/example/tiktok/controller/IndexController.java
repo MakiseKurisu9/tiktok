@@ -73,4 +73,14 @@ public class IndexController {
         return indexService.getUserPublishVideos(page,limit,userId);
     }
 
+    @GetMapping("/video/hot/rank")
+    public Result getHotRank() {
+        return indexService.getHotRank();
+    }
+
+    @GetMapping("/video/hot")
+    public Result getHotVideo() throws JsonProcessingException {
+        return indexService.getHotVideo();
+    }
+
 }

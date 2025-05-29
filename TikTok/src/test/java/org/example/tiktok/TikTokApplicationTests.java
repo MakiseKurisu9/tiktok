@@ -1,9 +1,14 @@
 package org.example.tiktok;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Resource;
 import org.example.tiktok.dto.EmailCodeDTO;
+import org.example.tiktok.mapper.VideoMapper;
+import org.example.tiktok.service.IndexService;
 import org.example.tiktok.service.LoginService;
 import org.example.tiktok.utils.AliOSSUtil;
+import org.example.tiktok.utils.CacheClient;
+import org.example.tiktok.utils.HotRank;
 import org.example.tiktok.utils.SnowflakeIdWorker;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,10 +23,22 @@ class TikTokApplicationTests {
     LoginService userService;
 
     @Resource
+    IndexService indexService;
+
+    @Resource
     AliOSSUtil aliOSSUtil;
 
     @Resource
     SnowflakeIdWorker snowflakeIdWorker;
+
+    @Resource
+    HotRank hotRank;
+
+    @Resource
+    VideoMapper videoMapper;
+
+    @Resource
+    CacheClient cacheClient;
 
     @Test
     void testMail() {
@@ -54,8 +71,14 @@ class TikTokApplicationTests {
     public void testSnow() {
         System.out.println(snowflakeIdWorker.nextId());
         System.out.println(snowflakeIdWorker.nextId());
-
     }
+
+    @Test
+    public void testHotRank() throws JsonProcessingException {
+        hotRank.calculateDailyHotRank();
+        System.out.println(indexService.getHotRank());
+    }
+
 
 
 

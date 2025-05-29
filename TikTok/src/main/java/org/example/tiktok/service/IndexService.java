@@ -22,4 +22,9 @@ public interface IndexService {
     Result deleteSearchHistory(String searchName);
 
     Result getUserPublishVideos(int page, int limit, Long userId) throws JsonProcessingException;
+
+    Result getHotVideo() throws JsonProcessingException;
+
+    Result getHotRank();
+
 }

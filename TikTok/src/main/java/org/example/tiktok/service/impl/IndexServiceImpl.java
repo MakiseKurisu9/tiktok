@@ -7,12 +7,14 @@ import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.tiktok.dto.PageBean;
+import org.example.tiktok.dto.VideoHot;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.entity.Video.VideoType;
 import org.example.tiktok.mapper.IndexMapper;
 import org.example.tiktok.service.IndexService;
 import org.example.tiktok.utils.CacheClient;
+import org.example.tiktok.utils.HotRank;
 import org.example.tiktok.utils.PublicVideoServiceUtil;
 import org.example.tiktok.utils.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -40,6 +42,9 @@ public class IndexServiceImpl implements IndexService {
     PublicVideoServiceUtil publicVideoServiceUtil;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Resource
+    HotRank hotRank;
 
     @Override
     public Result getVideosByTypeId(Long typeId) {
@@ -220,6 +225,24 @@ public class IndexServiceImpl implements IndexService {
         pageBean.setItems(videos);
         pageBean.setTotal(pageInfo.getTotal());
         return Result.ok("successfully get videos by this user",pageBean);
+    }
+
+    @Override
+    public Result getHotVideo() throws JsonProcessingException {
+        List<Video> videos = hotRank.getRecentHotVideo();
+        if(videos == null || videos.isEmpty()) {
+            return Result.ok("there is no recent hot video",Collections.emptyList());
+        }
+        return Result.ok("successfully get hot videos",videos);
+    }
+
+    @Override
+    public Result getHotRank() {
+        List<VideoHot> hotVideo = hotRank.getHotRankInfo();
+        if(hotVideo == null || hotVideo.isEmpty()) {
+            return Result.ok("there is no hot video now",Collections.emptyList());
+        }
+        return Result.ok("successfully get hot rank",hotVideo);
     }
 
     @Override

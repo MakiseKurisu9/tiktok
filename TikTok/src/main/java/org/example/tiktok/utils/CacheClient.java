@@ -27,6 +27,7 @@ public class CacheClient {
     @Resource
     private RedissonClient redissonClient;
 
+
     private final static ObjectMapper objectMapper = new ObjectMapper();
 
     public void set(String key, Object value, Long time, TimeUnit timeUnit) throws JsonProcessingException {
@@ -73,8 +74,7 @@ public class CacheClient {
         String key = keyPrefix + id;
         String json = stringRedisTemplate.opsForValue().get(key);
         if(json == null ||json.isBlank()) {
-            /*todo 打算做通过hotRank函数计算TOP10*/
-            //一帮情况下，数据会提前预热，暂时返回null，以后修改
+            //hotRank会自动执行 不用担心没有数据
             return null;
         }
         //转化为redisData对象
