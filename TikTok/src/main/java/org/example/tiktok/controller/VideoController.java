@@ -87,6 +87,22 @@ public class VideoController {
         return videoService.likeComment(commentId);
     }
 
+    @DeleteMapping("/comment/{commentId}")
+    public Result deleteComment(
+            @PathVariable Long commentId
+    ) {
+        return videoService.deleteComment(commentId);
+    }
+
+    @GetMapping("/index/comment/by/rootComment")
+    public Result getSubCommentsByRootId(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int limit,
+            @RequestParam(required = false) Long rootId
+    ) {
+        return videoService.getSubCommentsByRootId(page,limit,rootId);
+    }
+
 
 
 

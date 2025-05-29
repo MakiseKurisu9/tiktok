@@ -4,9 +4,9 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.BooleanUtils;
+import org.example.tiktok.dto.CommentersDTO;
 import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.entity.Result;
-import org.example.tiktok.entity.User.User;
 import org.example.tiktok.entity.Video.Comment;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.mapper.VideoMapper;
@@ -168,6 +168,7 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
+    @Transactional
     public Result commentOrAnswerComment(Long videoId, Long parentId, String content) {
         Long userId = UserHolder.getUser().getId();
         Comment comment = new Comment();
@@ -206,10 +207,12 @@ public class VideoServiceImpl implements VideoService {
         if(comments == null || comments.isEmpty()) {
             return Result.ok("there is no comment",Collections.emptyList());
         }
-        //可优化 先查id 再通过id查缓存 再查不在id中的user indexService中实现过了
+        //可优化 先查id 再通过id查缓存 再查不在id中的user indexService中实现过了 此处就不实现了
+        //未来可能会优化:)
         for(Comment comment : comments) {
-            User user = videoMapper.getUserById(comment.getFromUserId());
-            comment.setUser(user);
+            CommentersDTO commentersDTO = videoMapper.getUserById(comment.getFromUserId());
+            isCommentLiked(comment);
+            comment.setCommentersDTO(commentersDTO);
         }
 
         PageInfo<Comment> pageInfo = new PageInfo<>(comments);
@@ -241,6 +244,69 @@ public class VideoServiceImpl implements VideoService {
         }
         return Result.fail("like/unlike not affect");
     }
+
+    //前端判断评论的创建者是否为当前用户，是的话显示删除按钮
+    @Override
+    @Transactional
+    public Result deleteComment(Long commentId) {
+        Long userId = UserHolder.getUser().getId();
+        Comment comment = videoMapper.getCommentById(commentId);
+        if(comment == null ) {
+            return Result.fail("comment does not exist");
+        }
+        if(!comment.getFromUserId().equals(userId)) {
+            return Result.fail("not have authorize to delete comment");
+        }
+        //为根评论
+        if(comment.getParentId() == 0L) {
+            videoMapper.deleteCommentByRootId(comment.getRootId());
+        } else {
+            //不为根评论 删除底下的评论
+            videoMapper.deleteComment(comment.getId());
+            videoMapper.deleteCommentByParentId(comment.getParentId());
+        }
+        return Result.ok("delete successfully");
+    }
+
+    @Override
+    public Result getSubCommentsByRootId(int page, int limit, Long rootId) {
+        if(rootId != null) {
+            PageHelper.startPage(page,limit);
+            List<Comment> comments = videoMapper.getRootCommentsExcludeParentByVideoId(rootId);
+            if(comments != null) {
+                for(Comment comment : comments) {
+                    CommentersDTO commentersDTO = videoMapper.getUserById(comment.getFromUserId());
+                    isCommentLiked(comment);
+                    comment.setCommentersDTO(commentersDTO);
+                }
+                PageBean<Comment> pageBean = new PageBean<>();
+                PageInfo<Comment> pageInfo = new PageInfo<>(comments);
+
+                pageBean.setItems(pageInfo.getList());
+                pageBean.setTotal(pageInfo.getTotal());
+
+                return Result.ok("successfully get sub comments",pageBean);
+            }
+        }
+        return Result.fail("this comment has no root comment");
+    }
+
+
+    private void isCommentLiked(Comment comment) {
+        Long userId = UserHolder.getUser().getId();
+        String key = "comment:liked:" + comment.getId();
+        Boolean isMember = stringRedisTemplate.opsForSet().isMember(key,userId.toString());
+        comment.setIsLiked(BooleanUtils.isTrue(isMember));
+    }
+
+    /* 递归收集低级评论 like level2 level 3 level 4，类似reddit，抖音中实际只有两级
+    private void collectAllCommentIds(Long commentId, List<Long> ids) {
+    ids.add(commentId);
+    List<Long> children = videoMapper.getCommentIdsByParentId(commentId);
+    for (Long childId : children) {
+        collectAllCommentIds(childId, ids);
+    }
+}*/
 
 
 }

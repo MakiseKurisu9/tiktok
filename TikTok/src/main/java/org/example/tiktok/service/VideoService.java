@@ -26,4 +26,8 @@ public interface VideoService {
     Result getCommentByVideoId(int page, int limit, Long videoId);
 
     Result likeComment(Long commentId);
+
+    Result deleteComment(Long commentId);
+
+    Result getSubCommentsByRootId(int page, int limit, Long rootId);
 }
