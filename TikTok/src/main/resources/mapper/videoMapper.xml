@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.example.tiktok.mapper.VideoMapper">
     <!--批量通过id查询视频-->
-    <select id="getVideosByVideoId" resultType="org.example.tiktok.entity.Video.Video">
+    <select id="getVideosByVideoIds" resultType="org.example.tiktok.entity.Video.Video">
         SELECT *
         FROM video
         WHERE id IN

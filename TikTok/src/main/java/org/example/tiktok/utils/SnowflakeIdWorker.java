@@ -22,7 +22,7 @@ public class SnowflakeIdWorker {
 
     private long lastTimestamp = -1L;
     private long sequence = 0L;
-
+    //单体项目 workerId不需要存入redis中
     private final long workerId = 7;
     private final long datacenterId = 7;
 

@@ -21,7 +21,7 @@ public interface VideoService {
 
     Result listVideos(Integer page,Integer limit);
 
-    Result feedPush();
+    Result pushFeedVideos(Long max);
 
     Result commentOrAnswerComment(Long videoId, Long parentId, String comment);
 

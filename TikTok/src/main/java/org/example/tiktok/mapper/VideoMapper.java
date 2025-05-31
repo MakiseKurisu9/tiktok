@@ -2,6 +2,7 @@ package org.example.tiktok.mapper;
 
 import org.apache.ibatis.annotations.*;
 import org.example.tiktok.dto.CommentersDTO;
+import org.example.tiktok.entity.User.Follow;
 import org.example.tiktok.entity.Video.Comment;
 import org.example.tiktok.entity.Video.Video;
 
@@ -19,7 +20,7 @@ public interface VideoMapper {
     @Select("select * from favourite_video_relation where vid = #{videoId} and fid = #{favouriteTableId}")
     Integer isVideoInFavouriteTable(@Param("favouriteTableId")Long favouriteTableId,@Param("videoId") Long videoId);
 //in xml
-    List<Video> getVideosByVideoId(@Param("ids") List<Long> ids);
+    List<Video> getVideosByVideoIds(@Param("ids") List<Long> ids);
 
     @Update("update video set likes = likes + 1 where video.id = #{videoId}")
     Boolean starVideo(Long videoId);
@@ -87,13 +88,16 @@ public interface VideoMapper {
     List<Comment> getRootCommentsExcludeParentByVideoId(Long rootId);
 
     @Options(useGeneratedKeys = true, keyProperty = "id")
-    @Insert("insert into video(id, title, description, type, source, img_source, video_type_id, publisher_id, audit_status, audit_message, status, likes, views, favourites, shares, create_time, update_time, comments)" +
-            " VALUES (#{id}, #{title}, #{description}, #{type}, #{source}, #{imgSource}, #{videoTypeId}, #{publisherId}, #{auditStatus}, #{auditMessage}, #{status}, #{likes}, #{views}, #{favourites}, #{shares}, #{createTime}, #{updateTime}, #{comments})")
+    @Insert("insert into video( title, description, type, source, img_source, video_type_id, publisher_id, audit_status, audit_message, status, likes, views, favourites, shares, create_time, update_time, comments)" +
+            " VALUES ( #{title}, #{description}, #{type}, #{source}, #{imgSource}, #{videoTypeId}, #{publisherId}, #{auditStatus}, #{auditMessage}, #{status}, #{likes}, #{views}, #{favourites}, #{shares}, #{createTime}, #{updateTime}, #{comments})")
     void addVideo(Video video);
 
     @Select("select * from video")
     List<Video> getAllVideos();
 
-    @Update("update video set title = #{title},description = #{description}, type = #{type}, source = #{source}, img_source = #{imgSource},video_type_id = #{videoTypeId}, likes = 0, views = 0, favourites = 0, shares = 0, comments = 0 where id = #{id}")
+    @Update("update video set title = #{title},description = #{description}, type = #{type}, source = #{source}, img_source = #{imgSource},video_type_id = #{videoTypeId}, update_time = NOW() where id = #{id}")
     void updateVideo(Video video);
+
+    @Select("select * from follow where follow_id = #{userId}")
+    List<Follow> getFollowers(Long userId);
 }

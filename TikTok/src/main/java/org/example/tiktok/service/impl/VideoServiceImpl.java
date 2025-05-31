@@ -8,24 +8,24 @@ import jakarta.annotation.Resource;
 import org.apache.commons.lang3.BooleanUtils;
 import org.example.tiktok.dto.CommentersDTO;
 import org.example.tiktok.dto.PageBean;
+import org.example.tiktok.dto.ScrollResult;
 import org.example.tiktok.entity.Result;
+import org.example.tiktok.entity.User.Follow;
 import org.example.tiktok.entity.Video.Comment;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.mapper.VideoMapper;
 import org.example.tiktok.service.VideoService;
-import org.example.tiktok.utils.AliOSSUtil;
 import org.example.tiktok.utils.CacheClient;
 import org.example.tiktok.utils.PublicVideoServiceUtil;
+import org.example.tiktok.utils.SnowflakeIdWorker;
 import org.example.tiktok.utils.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -46,7 +46,8 @@ public class VideoServiceImpl implements VideoService {
     ObjectMapper objectMapper;
 
     @Resource
-    AliOSSUtil aliOSSUtil;
+    SnowflakeIdWorker snowflakeIdWorker;
+
 
     @Resource
     PublicVideoServiceUtil publicVideoServiceUtil;
@@ -102,7 +103,7 @@ public class VideoServiceImpl implements VideoService {
                 .map(Long::valueOf)
                 .toList();
         //get data from db equal SELECT * FROM video WHERE id IN (1, 2, 3, 4);
-        List<Video> videos = videoMapper.getVideosByVideoId(ids);
+        List<Video> videos = videoMapper.getVideosByVideoIds(ids);
         //先将数据存入map中，用于保存历史记录
         Map<Long,Video> videoMap = videos.stream()
                 .collect(Collectors.toMap(Video::getId,video -> video));
@@ -175,10 +176,7 @@ public class VideoServiceImpl implements VideoService {
 
     }
 
-    @Override
-    public Result feedPush() {
-        return null;
-    }
+
 
     @Override
     @Transactional
@@ -304,6 +302,31 @@ public class VideoServiceImpl implements VideoService {
         return Result.fail("this comment has no root comment");
     }
 
+    @Override
+    public Result pushFeedVideos(Long max) {
+        Long userId = UserHolder.getUser().getId();
+        String key = "feed:" + userId;
+        //新到旧 查3条
+        Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet()
+                .reverseRangeByScoreWithScores(key, 0, max, 0, 4);
+        if(typedTuples == null || typedTuples.isEmpty()) {
+            return Result.ok("no feed videos",Collections.emptyList());
+        }
+        List<Long> ids = new ArrayList<>(typedTuples.size());
+        long minTime = 0;
+        for(ZSetOperations.TypedTuple<String> zSetOperations : typedTuples) {
+            //视频id
+            ids.add(Long.valueOf(zSetOperations.getValue()));
+            //雪花id 最小时间
+            minTime = zSetOperations.getScore().longValue();
+        }
+        List<Video> videosByVideoIds = videoMapper.getVideosByVideoIds(ids);
+        ScrollResult result = new ScrollResult();
+        result.setList(videosByVideoIds);
+        result.setMinTime(minTime);
+        return Result.ok("successfully get feed push videos",result);
+    }
+
     //非空判断 前端进行
     @Override
     public Result addOrUpdateVideo(Video video) throws JsonProcessingException {
@@ -318,6 +341,13 @@ public class VideoServiceImpl implements VideoService {
             videoMapper.updateVideo(video);
             //删除旧的缓存数据
             stringRedisTemplate.delete("index:video:" + video.getId());
+        }
+        //feed 推送给所有粉丝
+        List<Follow> followers = videoMapper.getFollowers(userId);
+        for(Follow follow : followers) {
+            Long followerId = follow.getUserId();
+            String key = "feed:" + followerId;
+            stringRedisTemplate.opsForZSet().add(key,video.getId().toString(),snowflakeIdWorker.nextId());
         }
         //无论是添加还是更新 都需要更新缓存数据
         cacheClient.set("index:video:" + video.getId(),objectMapper.writeValueAsString(video),2L,TimeUnit.HOURS);

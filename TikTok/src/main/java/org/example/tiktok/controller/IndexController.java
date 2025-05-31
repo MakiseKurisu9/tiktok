@@ -27,7 +27,7 @@ public class IndexController {
 
     //先返回十个视频，用户刷到第七个的时候再返回十个，前端调
     @GetMapping("/pushVideos")
-    public Result getPushedVideos() {
+    public Result getPushedVideos() throws JsonProcessingException {
         return indexService.getPushedVideos();
     }
 
