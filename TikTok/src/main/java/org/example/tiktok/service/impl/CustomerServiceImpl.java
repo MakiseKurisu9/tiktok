@@ -8,9 +8,11 @@ import jakarta.annotation.Resource;
 import org.example.tiktok.dto.FavouriteDTO;
 import org.example.tiktok.dto.FollowersDTO;
 import org.example.tiktok.dto.PageBean;
+import org.example.tiktok.dto.UserModelDTO;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.User.Favourite;
 import org.example.tiktok.entity.User.User;
+import org.example.tiktok.entity.User.UserModel;
 import org.example.tiktok.entity.Video.VideoType;
 import org.example.tiktok.mapper.CustomerMapper;
 import org.example.tiktok.service.CustomerService;
@@ -233,6 +235,41 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
         return Result.ok("关注/取关成功");
+    }
+
+    @Override
+    public Result updateUserModel(UserModelDTO userModelDTO) throws JsonProcessingException {
+        Long userId = UserHolder.getUser().getId();
+        String key = "user:model:" + userId;
+        String json = stringRedisTemplate.opsForValue().get(key);
+        UserModel model = new UserModel();
+        //没有模型数据
+        if(json == null || json.isEmpty()) {
+            HashMap<Long,Double> modelMap  = new HashMap<>();
+            modelMap .put(userModelDTO.getTypeId(), userModelDTO.getScore());
+
+            model.setModel(modelMap);
+        } else {
+            model = objectMapper.readValue(json, UserModel.class);
+            Map<Long,Double> modelMap = model.getModel();
+
+            modelMap.put(
+                    userModelDTO.getTypeId(),
+                    //没有就从0开始，有就加上
+                    modelMap.getOrDefault(userModelDTO.getTypeId(),0.0) + userModelDTO.getScore()
+            );
+        }
+
+        Map<Long,Double> modelMap = model.getModel();
+        //计算评分总和
+        double total = modelMap.values().stream().mapToDouble(Double::doubleValue).sum();
+        //评分不为0，每个值除以总和，平均分配，权重归一
+        if(total > 0) {
+            modelMap.replaceAll((k, v) -> v / total);
+        }
+        String updatedJson = objectMapper.writeValueAsString(model);
+        cacheClient.set(key,updatedJson,7L,TimeUnit.DAYS);
+        return Result.ok("successfully update");
     }
 
     private Boolean isFollow(Long followUserId){

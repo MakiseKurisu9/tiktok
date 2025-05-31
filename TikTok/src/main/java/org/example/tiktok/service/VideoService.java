@@ -1,7 +1,9 @@
 package org.example.tiktok.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.example.tiktok.entity.Result;
+import org.example.tiktok.entity.Video.Video;
 
 
 public interface VideoService {
@@ -30,4 +32,6 @@ public interface VideoService {
     Result deleteComment(Long commentId);
 
     Result getSubCommentsByRootId(int page, int limit, Long rootId);
+
+    Result addOrUpdateVideo(Video video) throws JsonProcessingException;
 }

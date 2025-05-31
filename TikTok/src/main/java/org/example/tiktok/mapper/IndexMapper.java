@@ -36,4 +36,12 @@ public interface IndexMapper {
     List<Long> getUserPublishVideoIds(Long userId);
 
     List<Video> getVideosByIds(@Param("ids")List<Long> ids);
+
+    List<Video> getSimilarVideos(String[] types, Long videoId);
+
+    List<Video> getVideosByTagIds(@Param("tagIds") List<Long> tagIds, @Param("limit") int limit);
+
+    @Select("select * from video order by RAND() limit 10")
+    List<Video> getRandomVideos();
+
 }

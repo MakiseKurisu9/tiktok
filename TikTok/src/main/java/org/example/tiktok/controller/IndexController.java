@@ -82,5 +82,19 @@ public class IndexController {
     public Result getHotVideo() throws JsonProcessingException {
         return indexService.getHotVideo();
     }
+    //根据视频type推荐相似视频
+    @GetMapping("/video/similar")
+    public Result getSimilarVideoByType(Long videoId,
+                                        @RequestParam(required = false) String typeNames) {
+        return indexService.getSimilarVideoByType(videoId,typeNames);
+    }
+
+    //兴趣推荐
+    @GetMapping("/pushVideos")
+    public Result getPushVideos() throws JsonProcessingException {
+        return indexService.getPushedVideos();
+    }
+
+
 
 }

@@ -86,11 +86,14 @@ public interface VideoMapper {
     @Select("select * from comment where root_id = #{rootId} and id != #{rootId} order by create_time asc")
     List<Comment> getRootCommentsExcludeParentByVideoId(Long rootId);
 
+    @Options(useGeneratedKeys = true, keyProperty = "id")
     @Insert("insert into video(id, title, description, type, source, img_source, video_type_id, publisher_id, audit_status, audit_message, status, likes, views, favourites, shares, create_time, update_time, comments)" +
-            " VALUES (#{id}, #{title}, #{description}, #{type}, #{source}, #{imgSource}, #{videoTypeId}, #{publisherId}, #{auditStatus}, #{auditMessage}, #{status}, #{likes}, #{views}, #{favourites}, #{shares}, NOW(), NOW(), #{comments})")
+            " VALUES (#{id}, #{title}, #{description}, #{type}, #{source}, #{imgSource}, #{videoTypeId}, #{publisherId}, #{auditStatus}, #{auditMessage}, #{status}, #{likes}, #{views}, #{favourites}, #{shares}, #{createTime}, #{updateTime}, #{comments})")
     void addVideo(Video video);
 
     @Select("select * from video")
     List<Video> getAllVideos();
 
+    @Update("update video set title = #{title},description = #{description}, type = #{type}, source = #{source}, img_source = #{imgSource},video_type_id = #{videoTypeId}, likes = 0, views = 0, favourites = 0, shares = 0, comments = 0 where id = #{id}")
+    void updateVideo(Video video);
 }

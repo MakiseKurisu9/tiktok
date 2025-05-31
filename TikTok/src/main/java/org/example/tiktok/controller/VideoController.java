@@ -1,7 +1,9 @@
 package org.example.tiktok.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Resource;
 import org.example.tiktok.entity.Result;
+import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.service.VideoService;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,7 +42,12 @@ public class VideoController {
     }
 
     @DeleteMapping("/delete/{videoId}")
-    public Result delVideo(@PathVariable Long videoId) { return videoService.deleteVideo(videoId);}
+    public Result deleteVideo(@PathVariable Long videoId) { return videoService.deleteVideo(videoId);}
+
+    @PostMapping
+    public Result addOrUpdateVideo(@RequestBody Video video) throws JsonProcessingException {
+        return videoService.addOrUpdateVideo(video);
+    }
 
     //查询用户所管理的视频
     @GetMapping

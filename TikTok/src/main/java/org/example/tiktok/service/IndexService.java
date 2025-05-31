@@ -9,7 +9,7 @@ public interface IndexService {
 
     Result getAllVideoTypes();
 
-    Result getPushedVideos();
+    Result getPushedVideos() throws JsonProcessingException;
 
     Result getVideoById(Long videoId) throws JsonProcessingException;
 
@@ -27,4 +27,5 @@ public interface IndexService {
 
     Result getHotRank();
 
+    Result getSimilarVideoByType(Long videoId, String typeNames);
 }

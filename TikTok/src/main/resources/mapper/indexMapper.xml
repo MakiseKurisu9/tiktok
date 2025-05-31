@@ -23,4 +23,28 @@
             #{id}
         </foreach>
     </select>
+
+    <select id="getSimilarVideos" resultType="org.example.tiktok.entity.Video.Video">
+        SELECT *
+        FROM video
+        WHERE id != #{videoId}
+        AND (
+        <foreach collection="types" item="type" separator=" OR ">
+            video.type LIKE CONCAT('%', #{type}, '%')
+        </foreach>
+        )
+        ORDER BY create_time DESC
+        LIMIT 10
+    </select>
+
+    <select id="getVideosByTagIds" resultType="org.example.tiktok.entity.Video.Video">
+        SELECT *
+        FROM video
+        WHERE type_id IN
+        <foreach collection="tagIds" item="tagId" open="(" separator="," close=")">
+            #{tagId}
+        </foreach>
+        LIMIT #{limit}
+    </select>
+
 </mapper>

@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.dto.VideoHot;
 import org.example.tiktok.entity.Result;
+import org.example.tiktok.entity.User.UserModel;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.entity.Video.VideoType;
 import org.example.tiktok.mapper.IndexMapper;
@@ -62,11 +63,7 @@ public class IndexServiceImpl implements IndexService {
         return Result.ok("success get videoTypes",videoTypes);
     }
 
-    @Override
-    public Result getPushedVideos() {
-        /*todo*/
-        return null;
-    }
+
 
     @Override
     public Result getVideoById(Long videoId) throws JsonProcessingException {
@@ -243,6 +240,76 @@ public class IndexServiceImpl implements IndexService {
             return Result.ok("there is no hot video now",Collections.emptyList());
         }
         return Result.ok("successfully get hot rank",hotVideo);
+    }
+
+    //dto太多了 不加了
+    @Override
+    public Result getSimilarVideoByType(Long videoId, String typeNames) {
+        Video currentVideo = indexMapper.getVideoById(videoId);
+        if(currentVideo == null ) {
+            return Result.fail("video not exist");
+        }
+        if(typeNames == null || typeNames.isEmpty()) {
+            typeNames = currentVideo.getType();
+        }
+
+        String[] types = typeNames.split(",");
+        List<Video> similarVideos = indexMapper.getSimilarVideos(types,videoId);
+
+        return Result.ok("successful get similar videos",similarVideos);
+    }
+
+    @Override
+    public Result getPushedVideos() throws JsonProcessingException {
+        Long userId = UserHolder.getUser().getId();
+
+        String key = "user:model:" + userId;
+        String json = stringRedisTemplate.opsForValue().get(key);
+
+        List<Video> videos = new ArrayList<>();
+
+        if(json == null || json.isEmpty()) {
+            videos = indexMapper.getRandomVideos();
+        } else {
+            UserModel model = objectMapper.readValue(json, UserModel.class);
+            Map<Long,Double> interestMap = model.getModel();
+
+            List<Long> tagIds = getRandomTagIds(interestMap,3);
+
+            videos = indexMapper.getVideosByTagIds(tagIds,10);
+
+        }
+
+        return Result.ok("successfully get videos you may like",videos);
+    }
+//加点随机 带权随机抽样从用户兴趣分布中选出若干标签，用于生成个性化视频推荐结果
+    private List<Long> getRandomTagIds(Map<Long, Double> interestMap, int count) {
+        List<Long> tagIds = new ArrayList<>();
+        List<Map.Entry<Long, Double>> entries = new ArrayList<>(interestMap.entrySet());
+
+        // 归一化
+        double total = entries.stream().mapToDouble(Map.Entry::getValue).sum();
+        List<Double> cumulative = new ArrayList<>();
+        double acc = 0;
+        for (Map.Entry<Long, Double> entry : entries) {
+            acc += entry.getValue() / total;
+            cumulative.add(acc);
+        }
+
+        Random random = new Random();
+        while (tagIds.size() < count && tagIds.size() < entries.size()) {
+            double r = random.nextDouble();
+            for (int i = 0; i < cumulative.size(); i++) {
+                if (r <= cumulative.get(i)) {
+                    Long tagId = entries.get(i).getKey();
+                    if (!tagIds.contains(tagId)) {
+                        tagIds.add(tagId);
+                    }
+                    break;
+                }
+            }
+        }
+        return tagIds;
     }
 
     @Override

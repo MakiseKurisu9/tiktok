@@ -2,6 +2,7 @@ package org.example.tiktok.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.example.tiktok.dto.FavouriteDTO;
+import org.example.tiktok.dto.UserModelDTO;
 import org.example.tiktok.entity.Result;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +26,6 @@ public interface CustomerService {
     Result getUserInfoByUserId(Long userId) throws JsonProcessingException;
 
 
-
     Result updateUserInfo(String nickName, String avatarSource, String sex, String userDescription) throws JsonProcessingException;
 
     Result getFollow(Integer page, Integer limit);
@@ -33,4 +33,9 @@ public interface CustomerService {
     Result getFollowers(Integer page, Integer limit);
 
     Result followUser(Long followUserId, Boolean isFollow);
+
+    Result updateUserModel(UserModelDTO userModelDTO) throws JsonProcessingException;
+
+
+
 }

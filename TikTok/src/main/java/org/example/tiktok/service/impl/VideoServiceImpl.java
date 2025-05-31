@@ -1,5 +1,7 @@
 package org.example.tiktok.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
@@ -11,6 +13,8 @@ import org.example.tiktok.entity.Video.Comment;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.mapper.VideoMapper;
 import org.example.tiktok.service.VideoService;
+import org.example.tiktok.utils.AliOSSUtil;
+import org.example.tiktok.utils.CacheClient;
 import org.example.tiktok.utils.PublicVideoServiceUtil;
 import org.example.tiktok.utils.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,6 +38,15 @@ public class VideoServiceImpl implements VideoService {
 
     @Resource
     StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    CacheClient cacheClient;
+
+    @Resource
+    ObjectMapper objectMapper;
+
+    @Resource
+    AliOSSUtil aliOSSUtil;
 
     @Resource
     PublicVideoServiceUtil publicVideoServiceUtil;
@@ -289,6 +302,26 @@ public class VideoServiceImpl implements VideoService {
             }
         }
         return Result.fail("this comment has no root comment");
+    }
+
+    //非空判断 前端进行
+    @Override
+    public Result addOrUpdateVideo(Video video) throws JsonProcessingException {
+        Long userId = UserHolder.getUser().getId();
+        video.setPublisherId(userId);
+        video.setUpdateTime(LocalDateTime.now());
+        //add
+        if(video.getId() == null) {
+            video.setCreateTime(LocalDateTime.now());
+            videoMapper.addVideo(video);
+        } else {
+            videoMapper.updateVideo(video);
+            //删除旧的缓存数据
+            stringRedisTemplate.delete("index:video:" + video.getId());
+        }
+        //无论是添加还是更新 都需要更新缓存数据
+        cacheClient.set("index:video:" + video.getId(),objectMapper.writeValueAsString(video),2L,TimeUnit.HOURS);
+        return Result.ok("success update or add",video);
     }
 
 

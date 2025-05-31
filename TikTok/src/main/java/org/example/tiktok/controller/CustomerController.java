@@ -3,6 +3,7 @@ package org.example.tiktok.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Resource;
 import org.example.tiktok.dto.FavouriteDTO;
+import org.example.tiktok.dto.UserModelDTO;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.service.CustomerService;
 import org.springframework.web.bind.annotation.*;
@@ -71,6 +72,7 @@ public class CustomerController {
         return customerService.updateUserInfo(nickName,avatarSource,sex,userDescription);
     }
 
+
     //用户是哪个人的粉丝
     @GetMapping("/follow")
     public Result getFollow(@RequestParam(defaultValue = "1") Integer page,
@@ -93,6 +95,10 @@ public class CustomerController {
     /*todo*/
     //可能做共同查看共同关注 用set求个交集
 
+    @PostMapping("/updateUserModel")
+    public Result updateUserModel(@RequestBody UserModelDTO userModelDTO) throws JsonProcessingException {
+        return customerService.updateUserModel(userModelDTO);
+    }
 
 
 }
