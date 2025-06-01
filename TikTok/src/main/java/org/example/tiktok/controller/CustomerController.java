@@ -19,7 +19,7 @@ public class CustomerController {
     @Resource
     CustomerService customerService;
 
-    //获取用户收藏夹
+    //获取current用户收藏夹
     @GetMapping("/favourites")
     public Result getCustomerFavourite() {
         return customerService.getCustomerFavourite();

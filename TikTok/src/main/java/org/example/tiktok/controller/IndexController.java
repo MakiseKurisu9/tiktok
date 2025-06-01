@@ -25,11 +25,6 @@ public class IndexController {
         return indexService.getAllVideoTypes();
     }
 
-    //先返回十个视频，用户刷到第七个的时候再返回十个，前端调
-    @GetMapping("/pushVideos")
-    public Result getPushedVideos() throws JsonProcessingException {
-        return indexService.getPushedVideos();
-    }
 
     @GetMapping("/video/{videoId}")
     public Result getVideo(@PathVariable Long videoId) throws JsonProcessingException {
