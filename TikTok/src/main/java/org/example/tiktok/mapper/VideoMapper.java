@@ -88,8 +88,8 @@ public interface VideoMapper {
     List<Comment> getRootCommentsExcludeParentByVideoId(Long rootId);
 
     @Options(useGeneratedKeys = true, keyProperty = "id")
-    @Insert("insert into video( title, description, type, source, img_source, video_type_id, publisher_id, audit_status, audit_message, status, likes, views, favourites, shares, create_time, update_time, comments)" +
-            " VALUES ( #{title}, #{description}, #{type}, #{source}, #{imgSource}, #{videoTypeId}, #{publisherId}, #{auditStatus}, #{auditMessage}, #{status}, #{likes}, #{views}, #{favourites}, #{shares}, #{createTime}, #{updateTime}, #{comments})")
+    @Insert("insert into video( title, description, type, source, img_source, video_type_id, publisher_id, likes, views, favourites, shares, create_time, update_time, comments)" +
+            " VALUES ( #{title}, #{description}, #{type}, #{source}, #{imgSource}, #{videoTypeId}, #{publisherId}, #{likes}, #{views}, #{favourites}, #{shares}, #{createTime}, #{updateTime}, #{comments})")
     void addVideo(Video video);
 
     @Select("select * from video")

@@ -15,7 +15,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.example.tiktok.utils.SystemConstant.TOKEN_EXPIRE;
 import static org.example.tiktok.utils.SystemConstant.TOKEN_PREFIX;
 
 @Component
@@ -34,27 +33,28 @@ public class TokenInterceptor implements HandlerInterceptor {
         String token = request.getHeader("Authorization");
 
         if(StringUtils.isEmpty(token)) {
-            log.debug("token is empty");
+            System.out.println("token is empty");
             return true;
         }
 
         try {
+            System.out.println(token);
             Claims claims = jwtUtils.parseToken(token);
 
-            Long userId = claims.get("id", Long.class);
+            Long userId = claims.get("userId", Long.class);
             if (userId == null) {
-                log.debug("cannot find userId");
+                System.out.println("cannot find userId");
                 return true;
             }
             String key = TOKEN_PREFIX + userId;
             //is token expire or wrong
             String tokenRedis = stringRedisTemplate.opsForValue().get(key);
             if (tokenRedis == null || !token.equals(tokenRedis)) {
-                log.debug("tokenRedis is null or wrong");
+                System.out.println("tokenRedis is null or wrong");
                 return true;
             }
             //用户停留在公共页面时一直刷新token时长
-            stringRedisTemplate.expire(key, Long.parseLong(TOKEN_EXPIRE), TimeUnit.DAYS);
+            stringRedisTemplate.expire(key, 24, TimeUnit.HOURS);
 
             String nickname = claims.get("nickname", String.class);
             String email = claims.getSubject();
@@ -63,10 +63,12 @@ public class TokenInterceptor implements HandlerInterceptor {
                 UserDTO userDTO = new UserDTO(userId,nickname,email);
                 UserHolder.saveUser(userDTO);
             }
+            System.out.println("userId:" + userId+ " userNickName:" + nickname);
             return true;
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             //出现异常不影响访问公共api
-            log.debug("exception!!!");
+            System.out.println("exception!!!");
         }
         return true;
 

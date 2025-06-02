@@ -10,6 +10,8 @@ import org.example.tiktok.entity.BaseEntity;
 public class User extends BaseEntity {
     private Long id;
 
+    private String username;
+
     private String nickname;
 
     private String email;

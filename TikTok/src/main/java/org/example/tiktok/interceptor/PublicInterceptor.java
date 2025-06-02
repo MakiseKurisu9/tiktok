@@ -13,6 +13,7 @@ public class PublicInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if(UserHolder.getUser() == null ) {
             response.setStatus(401);
+            System.out.println("interceptor affect for test");
             return false;
         }
         return true;

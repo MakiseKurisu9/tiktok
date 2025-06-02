@@ -3,6 +3,7 @@ package org.example.tiktok.service.impl;
 import com.google.code.kaptcha.Producer;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.example.tiktok.dto.*;
 import org.example.tiktok.entity.Result;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import static org.example.tiktok.utils.SystemConstant.*;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements LoginService {
 
     @Resource
@@ -56,35 +58,38 @@ public class UserServiceImpl implements LoginService {
     //非空判断前端使用validator实现
     @Override
     public void getCaptcha(String uuid, HttpServletResponse response) throws IOException {
-        String text = producer.createText();
-        BufferedImage image = producer.createImage(text);
-        response.setContentType("image/jpeg");
-        response.setHeader("Cache-Control", "no-store, no-cache");
-        ImageIO.write(image, "jpg", response.getOutputStream());
-        stringRedisTemplate.opsForValue().set(CODE_PREFIX + uuid,text,5, TimeUnit.MINUTES);
+        try {
+            String text = producer.createText();
+            System.out.println(text);
+            BufferedImage image = producer.createImage(text);
+            response.setContentType("image/jpeg");
+            response.setHeader("Cache-Control", "no-store, no-cache");
+            response.setDateHeader("Expires", 0);
+            ImageIO.write(image, "jpg", response.getOutputStream());
+            stringRedisTemplate.opsForValue().set(CODE_PREFIX + uuid, text, 5, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            log.error("获取验证码失败", e);
+        }
     }
 
     @Override
     public Result login(LoginDTO loginDTO) {
-        String email = loginDTO.getEmail();
+        String username = loginDTO.getUsername();
         String password = loginDTO.getPassword();
         String code = loginDTO.getCode();
         String uuid = loginDTO.getUuid();
         String getCode = stringRedisTemplate.opsForValue().get(CODE_PREFIX + uuid);
-        if(emailValidator.isValidEmail(email)) {
-            return Result.fail("请确认邮箱格式");
-        }
         if( getCode == null || !code.equalsIgnoreCase(getCode) ) {
             return Result.fail("验证码输入错误");
         }
-        User user = loginMapper.getUserByEmail(email);
+        User user = loginMapper.getUserByUsername(username);
         if(user == null || !passwordUtils.match(password,user.getPassword()) ) {
             return Result.fail("请重新确认输入的是正确的邮箱和密码");
         }
         stringRedisTemplate.delete(CODE_PREFIX + uuid);
 
         String token = jwtUtils.generateToken(user);
-        stringRedisTemplate.opsForValue().set(TOKEN_PREFIX + user.getId(),token,24,TimeUnit.HOURS);
+        stringRedisTemplate.opsForValue().set("user:token:"+user.getId(),token,24,TimeUnit.HOURS);
 
         Map<String,Object> resultMap = new HashMap<>();
         resultMap.put("token",token);
@@ -98,6 +103,7 @@ public class UserServiceImpl implements LoginService {
 
         UserDTO currentUser = new UserDTO(user.getId(),user.getNickname(),user.getEmail());
         UserHolder.saveUser(currentUser);
+        System.out.println("login success");
         return Result.ok("登陆成功",resultMap);
     }
 
@@ -107,10 +113,11 @@ public class UserServiceImpl implements LoginService {
         String email = findPasswordDTO.getEmail();
         String password = findPasswordDTO.getNewPassword();
         String getCode = stringRedisTemplate.opsForValue().get(MAIL_CODE_PREFIX + email);
-        if(emailValidator.isValidEmail(email)) {
+        if(!emailValidator.isValidEmail(email)) {
             return Result.fail("请确认邮箱格式");
         }
         if(getCode == null || !code.equalsIgnoreCase(getCode)) {
+            System.out.println("code wrong");
             return Result.fail("验证码输入错误");
         }
         stringRedisTemplate.delete(MAIL_CODE_PREFIX + email);
@@ -126,11 +133,13 @@ public class UserServiceImpl implements LoginService {
         String code = emailCodeDTO.getCode();
         String mail = emailCodeDTO.getEmail();
         String uuid = emailCodeDTO.getUuid();
+        System.out.println(uuid);
         String getCode = stringRedisTemplate.opsForValue().get(CODE_PREFIX + uuid);
         if(getCode == null || !code.equalsIgnoreCase(getCode) ) {
             return Result.fail("请输入正确的图形验证码");
         }
-        if(!emailValidator.isValidEmail(mail)) {
+        if(!emailValidator.isValidEmail(mail) ) {
+            System.out.println("fail");
             return Result.fail("请输入正确的邮箱格式");
         }
         try {
@@ -151,6 +160,7 @@ public class UserServiceImpl implements LoginService {
     @Override
     public Result registry(RegistryDTO registryDTO) {
         String code = registryDTO.getCode();
+        String username =registryDTO.getUsername();
         String password = registryDTO.getPassword();
         String email = registryDTO.getEmail();
         String uuid = registryDTO.getUuid();
@@ -160,22 +170,24 @@ public class UserServiceImpl implements LoginService {
             return Result.fail("请输入正确的图形验证码");
         }
         String getEmailCode = stringRedisTemplate.opsForValue().get(MAIL_CODE_PREFIX + email);
-        if(emailCode == null || !emailCode.equalsIgnoreCase(getEmailCode) ) {
-            return Result.fail("邮箱验证码错误");
+        User userByEmail = loginMapper.getUserByUsername(email);
+        if(emailCode == null || !emailCode.equalsIgnoreCase(getEmailCode) || userByEmail != null) {
+            return Result.fail("邮箱验证码错误或邮箱已被占用");
         }
         stringRedisTemplate.delete(CODE_PREFIX + uuid);
         stringRedisTemplate.delete(MAIL_CODE_PREFIX + email);
         String encodePassword = passwordUtils.encodePassword(password);
         /* save data to db*/
-        loginMapper.registry(generateUser(encodePassword,email));
+        loginMapper.registry(generateUser(username,encodePassword,email));
         return Result.ok("registry success");
     }
 
-    private User generateUser(String password,String email) {
+    private User generateUser(String username,String password,String email) {
         String prefix = "user_";
         String number = UUID.randomUUID().toString().replaceAll("-","").substring(0,6);
         String nickname = RandomStringUtils.randomAlphabetic(8);
         User user = new User();
+        user.setUsername(username);
         user.setUserDescription("user has not set description");
         user.setNickname(prefix + nickname + "_" + number);
         user.setPassword(password);

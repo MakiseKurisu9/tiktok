@@ -22,13 +22,13 @@ public class MvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .order(0);                // 排除错误页面,
         registry.addInterceptor(publicInterceptor)
-                .addPathPatterns("/**")
                 .excludePathPatterns(
                         //and some other pages about watching videos
-                        "/login/captcha.jpg/**",  // 排除验证码请求
+                        "/login/captcha.jpg/*",  // 排除验证码请求
                         "/login/sendMail",        // 排除发送邮件请求
                         "/login/registry",        // 排除注册请求
-                        "/login/logIn",           // 排除登录请求
+                        "/login/logIn",
+                        "/login/findPassword",// 排除登录请求
 
                         "/video/index/comment/by/**",//获取视频评论
 
@@ -47,8 +47,6 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/customer/followers",
 
                         "/upload/**",
-
-
 
                         "/static/**",
                         "/webjars/**"
