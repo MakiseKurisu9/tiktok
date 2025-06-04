@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.dto.VideoHot;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.mapper.VideoMapper;
@@ -77,12 +78,12 @@ public class HotRank {
     public void calculateEvery3Days() throws JsonProcessingException {
         //每三天更新一次
         if (LocalDate.now().getDayOfYear() % 3 != 0) return;
-        List<Video> recentHot = getRecentHotVideo();
-        log.info("三日热点视频更新成功，共 {} 条", recentHot.size());
+        PageBean<Video> recentHot = getRecentHotVideo(1,10);
+        log.info("三日热点视频更新成功，共 {} 条", recentHot.getTotal());
     }
 
     //热门视频 和排行榜无关 但是放这了
-    public List<Video> getRecentHotVideo() throws JsonProcessingException {
+    public PageBean<Video> getRecentHotVideo(int pageNum,int pageSize) throws JsonProcessingException {
         List<Video> allVideos = videoMapper.getAllVideos();
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
 
@@ -99,10 +100,17 @@ public class HotRank {
                     return Double.compare(score2,score1);
                 })
                 .collect(Collectors.toList());
-        for(Video v : result) {
+         Collections.shuffle(result);
+        int fromIndex = Math.min((pageNum - 1) * pageSize, result.size());
+        int toIndex = Math.min(fromIndex + pageSize, result.size());
+        List<Video> pagedVideos = result.subList(fromIndex, toIndex);
+
+        PageBean<Video> pageBean = new PageBean<>((long) result.size(),pagedVideos);
+
+        for(Video v : pagedVideos) {
             cacheClient.set("index:video:"+v.getId(),v,3L, TimeUnit.DAYS);
         }
-        return result;
+        return pageBean;
     }
 
     private double computeHotScore(Video v) {

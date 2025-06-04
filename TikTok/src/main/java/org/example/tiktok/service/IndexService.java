@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.example.tiktok.entity.Result;
 
 public interface IndexService {
-    Result getVideosByTypeId(Long typeId);
+    Result getVideosByTypeId(Long typeId,int page,int limit);
 
     Result getAllVideoTypes();
 
@@ -23,7 +23,7 @@ public interface IndexService {
 
     Result getUserPublishVideos(int page, int limit, Long userId) throws JsonProcessingException;
 
-    Result getHotVideo() throws JsonProcessingException;
+    Result getHotVideo(int page,int limit) throws JsonProcessingException;
 
     Result getHotRank();
 

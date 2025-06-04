@@ -14,33 +14,57 @@ public class VideoController {
     @Resource
     VideoService videoService;
 
-    //favourite table
-    //get all videos in a favourite table
+    /**
+     * 获取某个收藏夹中的所有视频
+     * @param favouriteTableId 收藏夹 ID
+     * @return 收藏夹中的视频列表
+     */
     @GetMapping("/favourite/{favouriteTableId}")
     public Result getVideoInFavouriteTable(@PathVariable Long favouriteTableId) {
         return videoService.getVideoInFavouriteTable(favouriteTableId);
     }
-
+    /**
+     * 将指定视频添加到指定收藏夹中
+     * @param favouriteTableId 收藏夹 ID
+     * @param videoId 视频 ID
+     * @return 操作结果
+     */
     @PostMapping("/favourite/{favouriteTableId}/{videoId}")
     public Result addVideoIntoFavouriteTable(@PathVariable Long favouriteTableId,@PathVariable Long videoId) {
         return videoService.addVideoIntoFavouriteTable(favouriteTableId,videoId);
     }
-    //在用户刷视频的时候调用，在前端实现，视频播放几秒 后调用
+    /**
+     * 添加视频播放历史记录
+     * 前端播放视频几秒后调用此接口
+     * @param videoId 视频 ID
+     * @return 操作结果
+     */
     @PostMapping("/history/{videoId}")
     public Result addVideoIntoHistory(@PathVariable Long videoId) {
         return videoService.addVideoIntoHistory(videoId);
     }
-
+    /**
+     * 获取当前用户的视频播放历史记录
+     * @return 历史记录列表
+     */
     @GetMapping("/history")
     public Result getVideoHistory() {
         return videoService.getVideoHistory();
     }
-
+    /**
+     * 收藏（点赞）指定视频
+     * @param videoId 视频 ID
+     * @return 操作结果
+     */
     @PostMapping("/star/{videoId}")
     public Result starVideo(@PathVariable Long videoId) {
         return videoService.starVideo(videoId);
     }
-
+    /**
+     * 删除指定视频
+     * @param videoId 视频 ID
+     * @return 删除结果
+     */
     @DeleteMapping("/delete/{videoId}")
     public Result deleteVideo(@PathVariable Long videoId) { return videoService.deleteVideo(videoId);}
 

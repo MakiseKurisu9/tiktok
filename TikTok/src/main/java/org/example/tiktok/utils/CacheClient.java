@@ -27,8 +27,9 @@ public class CacheClient {
     @Resource
     private RedissonClient redissonClient;
 
+    @Resource
+    private ObjectMapper objectMapper ;
 
-    private final static ObjectMapper objectMapper = new ObjectMapper();
 
     public void set(String key, Object value, Long time, TimeUnit timeUnit) throws JsonProcessingException {
         String value2String = objectMapper.writeValueAsString(value);

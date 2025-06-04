@@ -44,7 +44,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Resource
     CacheClient cacheClient;
 
-    private final static ObjectMapper objectMapper = new ObjectMapper();
+    @Resource
+    private ObjectMapper objectMapper ;
 
     @Override
     public Result getCustomerFavourite() {

@@ -23,13 +23,15 @@ public class Video extends BaseEntity {
 
     private Long publisherId;
 
-    //第三方api字段
-    private String auditStatus;
+    private String publisherName;
 
-    private String auditMessage;
+    //第三方api字段 未来可能实现
+    //private String auditStatus;
+
+    //private String auditMessage;
 
     //例如 公开/私密
-    private String status;
+    //private String status;
 
     //冗余字段
     //点赞次数

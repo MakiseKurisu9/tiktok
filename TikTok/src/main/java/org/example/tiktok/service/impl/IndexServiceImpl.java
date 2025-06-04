@@ -42,18 +42,33 @@ public class IndexServiceImpl implements IndexService {
     @Resource
     PublicVideoServiceUtil publicVideoServiceUtil;
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    @Resource
+    private ObjectMapper objectMapper ;
 
     @Resource
     HotRank hotRank;
 
     @Override
-    public Result getVideosByTypeId(Long typeId) {
+    public Result getVideosByTypeId(Long typeId, int page, int limit) {
+        // 不使用 PageHelper，直接查所有数据
         List<Video> videos = indexMapper.getVideosByTypeId(typeId);
-        if(videos.isEmpty()) {
+        if (videos.isEmpty()) {
             return Result.ok("this type has no video", Collections.emptyList());
         }
-        return Result.ok("success get videosByTypeId",videos);
+
+        // 打乱顺序
+        Collections.shuffle(videos);
+
+        // 手动分页
+        int fromIndex = Math.min((page - 1) * limit, videos.size());
+        int toIndex = Math.min(fromIndex + limit, videos.size());
+        List<Video> pagedList = videos.subList(fromIndex, toIndex);
+
+        PageBean<Video> pageBean = new PageBean<>();
+        pageBean.setTotal((long) videos.size());
+        pageBean.setItems(pagedList);
+
+        return Result.ok("success get videosByTypeId", pageBean);
     }
 
     @Override
@@ -225,12 +240,12 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public Result getHotVideo() throws JsonProcessingException {
-        List<Video> videos = hotRank.getRecentHotVideo();
-        if(videos == null || videos.isEmpty()) {
+    public Result getHotVideo(int page,int limit) throws JsonProcessingException {
+        PageBean<Video> pageBean = hotRank.getRecentHotVideo(page,limit);
+        if(pageBean.getItems() == null || pageBean.getItems().isEmpty()) {
             return Result.ok("there is no recent hot video",Collections.emptyList());
         }
-        return Result.ok("successfully get hot videos",videos);
+        return Result.ok("successfully get hot videos",pageBean);
     }
 
     @Override
@@ -276,7 +291,7 @@ public class IndexServiceImpl implements IndexService {
 
             List<Long> tagIds = getRandomTagIds(interestMap,3);
 
-            videos = indexMapper.getVideosByTagIds(tagIds,10);
+            videos = indexMapper.getVideosByTagIds(tagIds,100);
 
         }
 

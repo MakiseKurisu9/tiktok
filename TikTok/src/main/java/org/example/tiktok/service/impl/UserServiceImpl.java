@@ -166,6 +166,10 @@ public class UserServiceImpl implements LoginService {
         String uuid = registryDTO.getUuid();
         String emailCode = registryDTO.getEmailCode();
         String getCode = stringRedisTemplate.opsForValue().get(CODE_PREFIX + uuid);
+        User user = loginMapper.getUserByUsername(username);
+        if(user != null) {
+            return Result.fail("该用户名已经被注册，请更换用户名");
+        }
         if(getCode == null || !code.equalsIgnoreCase(getCode) ) {
             return Result.fail("请输入正确的图形验证码");
         }

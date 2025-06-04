@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS video (
                                      img_source VARCHAR(30),
                                      video_type_id BIGINT,
                                      publisher_id BIGINT NOT NULL,
+                                     publisher_name VARCHAR(20) NOT NULL,
                                      likes BIGINT DEFAULT 0,
                                      views BIGINT DEFAULT 0,
                                      favourites BIGINT DEFAULT 0,

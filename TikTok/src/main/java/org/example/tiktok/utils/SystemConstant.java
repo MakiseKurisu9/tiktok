@@ -12,9 +12,6 @@ public class SystemConstant {
 
     public static final String History_PREFIX = "video:history:";
     //token expire = 1 day
-    public static final String TOKEN_EXPIRE = "1";
-
-    public static final String SINGLE_VIDEO_PREFIX = "video:";//+videoId
 
 
 }

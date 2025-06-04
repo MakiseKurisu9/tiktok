@@ -8,6 +8,8 @@ import com.aliyun.oss.model.ObjectListing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Resource;
 import org.example.tiktok.dto.EmailCodeDTO;
+import org.example.tiktok.dto.PageBean;
+import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.mapper.VideoMapper;
 import org.example.tiktok.service.IndexService;
@@ -185,6 +187,30 @@ class TikTokApplicationTests {
         System.out.println(snowflakeIdWorker.nextId());
         System.out.println(snowflakeIdWorker.nextId());
     }
+
+    @Test
+    public void getHotVideo() throws JsonProcessingException {
+        PageBean<Video> recentHotVideo = hotRank.getRecentHotVideo(1,10);
+        System.out.println(recentHotVideo);
+        System.out.println("分割线-------------");
+        PageBean<Video> recentHotVideo2 = hotRank.getRecentHotVideo(2,10);
+        System.out.println(recentHotVideo2);
+    }
+
+    @Test
+    public void testGetAllTypes() {
+        Result allVideoTypes = indexService.getAllVideoTypes();
+
+        System.out.println(allVideoTypes);
+    }
+
+    @Test
+    public void testGetVideosByTypeId() {
+        Result videosByTypeId = indexService.getVideosByTypeId(1L, 1, 10);
+        System.out.println(videosByTypeId.getData());
+    }
+
+
 
     @Test
     public void testHotRank() throws JsonProcessingException {
