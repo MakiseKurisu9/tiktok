@@ -22,34 +22,46 @@ public class MvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .order(0);                // 排除错误页面,
         registry.addInterceptor(publicInterceptor)
+                .addPathPatterns("/**")
                 .excludePathPatterns(
-                        //and some other pages about watching videos
-                        "/login/captcha.jpg/*",  // 排除验证码请求
-                        "/login/sendMail",        // 排除发送邮件请求
-                        "/login/registry",        // 排除注册请求
-                        "/login/logIn",
-                        "/login/findPassword",// 排除登录请求
+                        // ── Infrastructure ──────────────────────────────────
+                        "/error",                // Spring error page
+                        "/favicon.ico",          // browser auto-request
 
-                        "/video/index/comment/by/**",//获取视频评论
-
-                        "/index/video/type/**",//获取分类下的所有视频
-                        "/index/types",//获取视频分类
-                        "/index/video/**",//看某个视频
-                        "/index/pushVideos",//推荐
-                        "/index/search",//搜索
-                        "/index/share/**",//分享
-                        "/index/video/user",//查看用户发布的视频
-                        "/index/video/hot/**",//热榜
-                        "/index/video/similar",
-
-                        "/customer/getInfo/**",
-                        "/customer/follow",
-                        "/customer/followers",
-
-                        "/upload/**",
-
+                        // ── Static assets ───────────────────────────────────
                         "/static/**",
-                        "/webjars/**"
+                        "/webjars/**",
+
+                        // ── Auth / registration ─────────────────────────────
+                        "/login/captcha.jpg/**", // CAPTCHA image
+                        "/login/sendMail",       // send verification e-mail
+                        "/login/registry",       // register new account
+                        "/login/logIn",          // sign in
+                        "/login/findPassword",   // password recovery
+
+                        // ── Public video browsing (no login required) ────────
+                        "/index/pushVideos",          // recommended feed
+                        "/index/search",              // search
+                        "/index/types",               // list all categories
+                        "/index/video/type/**",       // videos by category
+                        "/index/video/**",            // watch a video
+                        "/index/video/hot/**",        // hot / trending
+                        "/index/video/similar",       // similar videos
+                        "/index/share/**",            // share link
+
+                        // ── Public comment viewing ───────────────────────────
+                        "/video/index/comment/by/**", // comments on a video
+
+                        // ── Public profile viewing ───────────────────────────
+                        "/customer/getInfo/**",       // view any user's profile
+                        "/customer/follow",           // follower count (read-only)
+                        "/customer/followers"         // follower list  (read-only)
+
+                        // NOTE: /upload/** is intentionally NOT excluded here.
+                        // Uploading content requires the user to be signed in.
+                        // If you need a public CDN-style read path (e.g. serving
+                        // uploaded files), add a separate read-only pattern such
+                        // as "/upload/public/**" and exclude only that.
                 )//占位符，之后修改为所有和个人信息有关的路径
                 .order(1);
     }
