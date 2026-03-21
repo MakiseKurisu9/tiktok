@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.example.tiktok.dto.FavouriteDTO;
 import org.example.tiktok.dto.FollowersDTO;
 import org.example.tiktok.dto.PageBean;
@@ -19,6 +20,8 @@ import org.example.tiktok.service.CustomerService;
 import org.example.tiktok.utils.AliOSSUtil;
 import org.example.tiktok.utils.CacheClient;
 import org.example.tiktok.utils.UserHolder;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +33,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 public class CustomerServiceImpl implements CustomerService {
 
     @Resource
@@ -46,6 +50,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Resource
     private ObjectMapper objectMapper ;
+
+    @Resource
+    private RedissonClient redissonClient;
 
     @Override
     public Result getCustomerFavourite() {
@@ -248,36 +255,58 @@ public class CustomerServiceImpl implements CustomerService {
         return Result.ok("关注/取关成功");
     }
 
+    private static final double Max_SCORE = 5.0;// clamp client input
+    private static final double Decay_FACTOR = 0.9;// old weights fade each update
+
     @Override
     public Result updateUserModel(UserModelDTO userModelDTO) throws JsonProcessingException {
+        //输入校验，typeId和score不能为空，score应该大于0
+        if(userModelDTO.getTypeId() == null || userModelDTO.getScore() <= 0) {
+            return Result.fail("Invalid model input");
+        }
+        double clampedScore = Math.min(userModelDTO.getScore(), Max_SCORE);
+
+        if (UserHolder.getUser() == null) return Result.ok("guest, skipped");
+
         Long userId = UserHolder.getUser().getId();
         String key = "user:model:" + userId;
-        String json = stringRedisTemplate.opsForValue().get(key);
-        UserModel model = new UserModel();
-        //没有模型数据
-        if(json == null || json.isEmpty()) {
-            HashMap<Long,Double> modelMap  = new HashMap<>();
-            modelMap .put(userModelDTO.getTypeId(), userModelDTO.getScore());
+        // ── 2. Use Redisson lock to prevent lost-update race condition ────────
+        RLock lock = redissonClient.getLock("lock:user:model:" + userId);
+        try {
+            lock.lock(3,TimeUnit.SECONDS);
+            // ── 3. Read existing model (unified — no if/else needed) ──────────
+            String json = stringRedisTemplate.opsForValue().get(key);
+            Map<Long,Double> modelMap = new HashMap<>();
 
-            model.setModel(modelMap);
-        } else {
-            model = objectMapper.readValue(json, UserModel.class);
-            Map<Long,Double> modelMap = model.getModel();
-            modelMap.put(
-                    userModelDTO.getTypeId(),
-                    //没有就从0开始，有就加上
-                    modelMap.getOrDefault(userModelDTO.getTypeId(),0.0) + userModelDTO.getScore()
-            );
+            // ── 3. Read existing model (unified — no if/else needed) ──────────
+            if (json != null && !json.isBlank()) {
+                UserModel existingModel = objectMapper.readValue(json, UserModel.class);
+                if(existingModel.getModel() != null) {
+                    modelMap = new HashMap<>(existingModel.getModel());
+                }
+            }
+            // ── 4. Decay old interests, then add new score ────────────────────
+            //    Multiply every existing weight by 0.9 so stale interests shrink
+            //    over time, then add the new observation on top.
+            modelMap.replaceAll((k,v) -> v * Decay_FACTOR);
+            modelMap.merge(userModelDTO.getTypeId(), clampedScore, Double::sum);
+
+            // ── 5. Re-normalise so all weights sum to 1.0 ─────────────────────
+            double total = modelMap.values().stream().mapToDouble(Double::doubleValue).sum();
+            if (total > 0) {
+                modelMap.replaceAll((k, v) -> v / total);
+            }
+
+            // ── 6. Persist back ───────────────────────────────────────────────
+            UserModel updated = new UserModel();
+            updated.setModel(modelMap);
+            cacheClient.set(key, updated, 7L, TimeUnit.DAYS);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse user model for userId={}", userId, e);
+            return Result.fail("Model update fail");
+        } finally {
+            lock.unlock();
         }
-        Map<Long,Double> modelMap = model.getModel();
-        //计算评分总和
-        double total = modelMap.values().stream().mapToDouble(Double::doubleValue).sum();
-        //评分不为0，每个值除以总和，平均分配，权重归一
-        if(total > 0) {
-            modelMap.replaceAll((k, v) -> v / total);
-        }
-        String updatedJson = objectMapper.writeValueAsString(model);
-        cacheClient.set(key,updatedJson,7L,TimeUnit.DAYS);
         return Result.ok("successfully update");
     }
 
