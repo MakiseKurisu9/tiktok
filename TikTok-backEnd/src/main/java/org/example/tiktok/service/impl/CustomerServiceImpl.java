@@ -222,6 +222,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public Result followUser(Long followUserId, Boolean isFollow) {
         Long userId = UserHolder.getUser().getId();
         //redis存储关注用户的数据
@@ -231,11 +232,17 @@ public class CustomerServiceImpl implements CustomerService {
             int isSuccess = customerMapper.unFollow(followUserId, userId);
             if(isSuccess > 0) {
                 stringRedisTemplate.opsForSet().remove(key,followUserId.toString());
+                // followUserId loses 1 fan, userId follows 1 fewer person
+                customerMapper.updateFollowersCount(followUserId, -1);
+                customerMapper.updateFollowCount(userId, -1);
             }
         } else {
             int isSuccess = customerMapper.follow(followUserId, userId);
             if(isSuccess > 0) {
                 stringRedisTemplate.opsForSet().add(key,followUserId.toString());
+                // followUserId gains 1 fan, userId follows 1 more person
+                customerMapper.updateFollowersCount(followUserId, 1);
+                customerMapper.updateFollowCount(userId, 1);
             }
         }
         return Result.ok("关注/取关成功");

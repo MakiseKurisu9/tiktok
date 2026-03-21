@@ -65,6 +65,12 @@ public interface CustomerMapper {
     @Delete("delete from follow where follow_id =#{followUserId} and follower_id = #{followerId}")
     int unFollow(@Param("followUserId")Long followUserId,@Param("followerId") Long followerId);
 
+    @Update("UPDATE user SET follow = GREATEST(follow + #{delta}, 0) WHERE id = #{userId}")
+    void updateFollowCount(@Param("userId") Long userId, @Param("delta") int delta);
+
+    @Update("UPDATE user SET followers = GREATEST(followers + #{delta}, 0) WHERE id = #{userId}")
+    void updateFollowersCount(@Param("userId") Long userId, @Param("delta") int delta);
+
     @Insert("INSERT INTO follow (follow_id, follower_id) VALUES (#{followUserId}, #{followerId})")
     int follow(@Param("followUserId")Long followUserId,@Param("followerId") Long followerId);
 
