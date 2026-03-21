@@ -27,8 +27,8 @@ public class Comment extends BaseEntity {
     //喜欢数量 子评论数量
     private Integer likesCount;
     private Integer childCount;
-    //exist = false
+    //仅作标注 不使用@TableField(exist = false)注解
     private CommentersDTO commentersDTO;
-    private List<Comment> comments;
+    private List<Comment> children;
     private Boolean isLiked;
 }

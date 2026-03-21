@@ -77,15 +77,14 @@ public class CustomerServiceImpl implements CustomerService {
         favourite.setName(favouriteDTO.getName());
         favourite.setDescription(favouriteDTO.getDescription());
         favourite.setCreateUserId(userId);
-
-
+        //add
         if(favouriteDTO.getId() == null) {
             favourite.setCreateTime(LocalDateTime.now());
             favourite.setVideoCount(0);
             favourite.setUpdateTime(LocalDateTime.now());
             customerMapper.addFavourite(favourite);
             return Result.ok("successfully add favourite",favourite);
-        } else {
+        } else {//update
             customerMapper.updateFavourite(favourite);
             return Result.ok("successfully update favourite",favourite);
         }
@@ -95,6 +94,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional
     public Result delFavourite(Long favouriteId) {
         customerMapper.delFavouriteById(favouriteId);
+        //delete relation table
         customerMapper.delFavouriteUserById(favouriteId);
         customerMapper.delFavouriteVideoById(favouriteId);
         return Result.ok("successfully delete favourite");
@@ -140,6 +140,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Result getUserInfoByUserId(Long userId) throws JsonProcessingException {
         String keyPrefix = "customer:user:";
+        //防缓存穿透
         User user = cacheClient.queryWithPassThrough(
                 keyPrefix,
                 userId,
@@ -163,6 +164,7 @@ public class CustomerServiceImpl implements CustomerService {
         user.setUserDescription(userDescription);
         user.setSex(sex);
         user.setAvatarSource(avatarSource);
+        //先操作数据库再操作redis 确保一致性
         customerMapper.updateUserInfo(user);
         stringRedisTemplate.delete(key);
         cacheClient.set(key,user,2L,TimeUnit.HOURS);
@@ -178,8 +180,9 @@ public class CustomerServiceImpl implements CustomerService {
             return Result.ok("this user do not follow anyone",Collections.emptyList());
         }
         PageHelper.startPage(page,limit);
+        //获取关注的人
         List<FollowersDTO> follows = customerMapper.getFollowInfo(followIds);
-
+        //查看是否互关了，互相关注的人中是否有对方，查询粉丝列表
         List<Long> mutualIds = customerMapper.getFollowersInList(userId,followIds);
         Set<Long> mutualSet = new HashSet<>(mutualIds);
         for (FollowersDTO dto : follows) {
@@ -204,7 +207,7 @@ public class CustomerServiceImpl implements CustomerService {
         PageHelper.startPage(page,limit);
         List<FollowersDTO> followers = customerMapper.getFollowersInfo(followersId);
 
-        //查看是否互关 userId is follow followersDTO.getId()
+        //查看是否互关 userId is follow followersDTO.getId() 同上
         List<Long> mutualIds = customerMapper.getFollowingIds(userId,followersId);
         Set<Long> mutualSet = new HashSet<>(mutualIds);
         for (FollowersDTO dto : followers) {
@@ -253,14 +256,12 @@ public class CustomerServiceImpl implements CustomerService {
         } else {
             model = objectMapper.readValue(json, UserModel.class);
             Map<Long,Double> modelMap = model.getModel();
-
             modelMap.put(
                     userModelDTO.getTypeId(),
                     //没有就从0开始，有就加上
                     modelMap.getOrDefault(userModelDTO.getTypeId(),0.0) + userModelDTO.getScore()
             );
         }
-
         Map<Long,Double> modelMap = model.getModel();
         //计算评分总和
         double total = modelMap.values().stream().mapToDouble(Double::doubleValue).sum();

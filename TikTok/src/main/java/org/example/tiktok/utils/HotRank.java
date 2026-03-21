@@ -82,7 +82,7 @@ public class HotRank {
         log.info("三日热点视频更新成功，共 {} 条", recentHot.getTotal());
     }
 
-    //热门视频 和排行榜无关 但是放这了
+    //热门视频
     public PageBean<Video> getRecentHotVideo(int pageNum,int pageSize) throws JsonProcessingException {
         List<Video> allVideos = videoMapper.getAllVideos();
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);

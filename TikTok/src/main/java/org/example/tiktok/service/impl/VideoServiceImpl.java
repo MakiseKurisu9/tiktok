@@ -48,9 +48,9 @@ public class VideoServiceImpl implements VideoService {
     @Resource
     SnowflakeIdWorker snowflakeIdWorker;
 
-
     @Resource
     PublicVideoServiceUtil publicVideoServiceUtil;
+
     @Override
     public Result getVideoInFavouriteTable(Long favouriteTableId) {
         List<Video> videoList = videoMapper.getVideoInFavouriteTable(favouriteTableId);
@@ -188,11 +188,11 @@ public class VideoServiceImpl implements VideoService {
         comment.setVideoId(videoId);
         comment.setCreateTime(LocalDateTime.now());
         comment.setUpdateTime(LocalDateTime.now());
+        comment.setLikesCount(0);
+        comment.setChildCount(0);
         //评论视频，一级评论
         if(parentId == null) {
             comment.setParentId(0L);
-            comment.setLikesCount(0);
-            comment.setChildCount(0);
             videoMapper.addComment(comment);
             comment.setRootId(comment.getId());
             videoMapper.updateRootId(comment.getId(),comment.getId());
@@ -203,7 +203,8 @@ public class VideoServiceImpl implements VideoService {
             }
             comment.setToUserId(parentComment.getFromUserId());
             comment.setParentId(parentComment.getId());
-            comment.setRootId(parentComment.getRootId() != null ? parentComment.getRootId() : parentId);
+            comment.setRootId(parentComment.getRootId() != null ?
+                    parentComment.getRootId() : parentId);
             videoMapper.addComment(comment);
 
             videoMapper.addChildCount(parentComment.getId());
@@ -214,17 +215,14 @@ public class VideoServiceImpl implements VideoService {
     @Override
     public Result getCommentByVideoId(int page, int limit, Long videoId) {
         PageHelper.startPage(page,limit);
+
+        //查询一级评论
         List<Comment> comments = videoMapper.getRootCommentsByVideoId(videoId);
         if(comments == null || comments.isEmpty()) {
             return Result.ok("there is no comment",Collections.emptyList());
         }
-        //可优化 先查id 再通过id查缓存 再查不在id中的user indexService中实现过了 此处就不实现了
-        //未来可能会优化:)
-        for(Comment comment : comments) {
-            CommentersDTO commentersDTO = videoMapper.getUserById(comment.getFromUserId());
-            isCommentLiked(comment);
-            comment.setCommentersDTO(commentersDTO);
-        }
+
+        setCommentsByUserMap(comments);
 
         PageInfo<Comment> pageInfo = new PageInfo<>(comments);
 
@@ -266,40 +264,63 @@ public class VideoServiceImpl implements VideoService {
             return Result.fail("comment does not exist");
         }
         if(!comment.getFromUserId().equals(userId)) {
-            return Result.fail("not have authorize to delete comment");
+            return Result.fail("not authorized to delete comment");
         }
         //为根评论
-        if(comment.getParentId() == 0L) {
+        if(comment.getParentId().equals(0L)) {
             videoMapper.deleteCommentByRootId(comment.getRootId());
         } else {
             //不为根评论 删除底下的评论
             videoMapper.deleteComment(comment.getId());
-            videoMapper.deleteCommentByParentId(comment.getParentId());
+            videoMapper.deleteCommentByParentId(comment.getId());
+            videoMapper.decreaseChildCount(comment.getParentId());
         }
+
         return Result.ok("delete successfully");
     }
 
     @Override
     public Result getSubCommentsByRootId(int page, int limit, Long rootId) {
-        if(rootId != null) {
-            PageHelper.startPage(page,limit);
-            List<Comment> comments = videoMapper.getRootCommentsExcludeParentByVideoId(rootId);
-            if(comments != null) {
-                for(Comment comment : comments) {
-                    CommentersDTO commentersDTO = videoMapper.getUserById(comment.getFromUserId());
-                    isCommentLiked(comment);
-                    comment.setCommentersDTO(commentersDTO);
-                }
-                PageBean<Comment> pageBean = new PageBean<>();
-                PageInfo<Comment> pageInfo = new PageInfo<>(comments);
-
-                pageBean.setItems(pageInfo.getList());
-                pageBean.setTotal(pageInfo.getTotal());
-
-                return Result.ok("successfully get sub comments",pageBean);
+        if(rootId == null) {
+                return Result.fail("this comment has no root comment");
             }
+
+        PageHelper.startPage(page,limit);
+
+        //查询rootId下所有子评论
+        List<Comment> comments =
+                    videoMapper.getRootCommentsExcludeParentByRootId(rootId);
+
+        if(comments == null || comments.isEmpty()) {
+                return Result.ok("this comment has no sub comment",Collections.emptyList());
         }
-        return Result.fail("this comment has no root comment");
+
+        setCommentsByUserMap(comments);
+        PageBean<Comment> pageBean = new PageBean<>();
+        PageInfo<Comment> pageInfo = new PageInfo<>(comments);
+
+        pageBean.setItems(pageInfo.getList());
+        pageBean.setTotal(pageInfo.getTotal());
+
+        return Result.ok("successfully get sub comments",pageBean);
+    }
+
+    private void setCommentsByUserMap(List<Comment> comments) {
+        Set<Long> userIds = comments.stream()
+                .map(Comment::getFromUserId)
+                .collect(Collectors.toSet());
+
+        List<CommentersDTO> users = videoMapper.getUsersByIds(new ArrayList<>(userIds));
+
+        Map<Long,CommentersDTO> userMap = users.stream().
+                collect(Collectors.toMap(CommentersDTO::getId,user -> user)
+        );
+
+
+        for(Comment comment : comments) {
+            comment.setCommentersDTO(userMap.get(comment.getFromUserId()));
+            isCommentLiked(comment);
+        }
     }
 
     @Override
@@ -347,6 +368,7 @@ public class VideoServiceImpl implements VideoService {
         for(Follow follow : followers) {
             Long followerId = follow.getUserId();
             String key = "feed:" + followerId;
+            //雪花id为score
             stringRedisTemplate.opsForZSet().add(key,video.getId().toString(),snowflakeIdWorker.nextId());
         }
         //无论是添加还是更新 都需要更新缓存数据

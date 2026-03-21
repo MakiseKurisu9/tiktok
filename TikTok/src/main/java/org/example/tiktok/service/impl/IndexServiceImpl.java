@@ -199,7 +199,7 @@ public class IndexServiceImpl implements IndexService {
         List<String> jsonList = stringRedisTemplate.opsForValue().multiGet(keys);
 
         List<Long> missingIds = new ArrayList<>();
-
+        //查找缓存中是否有这些video的信息
         for (int i = 0; i < jsonList.size(); i++) {
             String json = jsonList.get(i);
             Long id = ids.get(i);

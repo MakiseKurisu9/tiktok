@@ -57,8 +57,13 @@ public interface VideoMapper {
     @Select("select * from comment where id = #{id}")
     Comment getCommentById(Long id);
 
+    List<CommentersDTO> getUsersByIds(List<Long> userIds);
+
     @Update("update comment set child_count = child_count + 1 where id = #{id}")
     void addChildCount(Long id);
+
+    @Update("update comment set child_count = child_count - 1 where id = #{id}")
+    void decreaseChildCount(Long id);
 
     @Update("update comment set root_id = #{rootId} where id = #{id}")
     void updateRootId(@Param("id") Long id,@Param("rootId") Long rootId);
@@ -85,7 +90,7 @@ public interface VideoMapper {
     void deleteCommentByParentId(Long parentId);
 
     @Select("select * from comment where root_id = #{rootId} and id != #{rootId} order by create_time")
-    List<Comment> getRootCommentsExcludeParentByVideoId(Long rootId);
+    List<Comment> getRootCommentsExcludeParentByRootId(Long rootId);
 
     @Options(useGeneratedKeys = true, keyProperty = "id")
     @Insert("insert into video( title, description, type, source, img_source, video_type_id, publisher_id, likes, views, favourites, shares, create_time, update_time, comments,publisher_name)" +
@@ -100,4 +105,8 @@ public interface VideoMapper {
 
     @Select("select * from follow where follow_id = #{userId}")
     List<Follow> getFollowers(Long userId);
+
+
+
+
 }
