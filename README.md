@@ -2,6 +2,8 @@
 
 A full-featured short-video community backend built with Spring Boot 3, covering the core business domains of a production-grade video platform — user management, video publishing, social graph, content feed, and a real-time hot-ranking engine.
 
+中文版位于英文版结尾
+
 ---
 
 ## Table of Contents

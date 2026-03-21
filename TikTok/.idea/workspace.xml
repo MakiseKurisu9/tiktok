@@ -1,0 +1,649 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="16d94950-9ab0-4a61-93d2-ce6bbcc2424d" name="Changes" comment="change project name" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHome" value="Use Maven wrapper" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="OptimizeOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="2" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2x0H33PMJW1sxzVGrUcFjTVZTeE" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Database Script.initialize.sql.executor": "Run",
+    "JUnit.HotRankTest.executor": "Run",
+    "JUnit.HotRankTest.testCalculateAndGetHotRank.executor": "Run",
+    "JUnit.TikTokApplicationTests.executor": "Run",
+    "JUnit.TikTokApplicationTests.getHotVideo.executor": "Run",
+    "JUnit.TikTokApplicationTests.initDataBaseFromAliOss.executor": "Run",
+    "JUnit.TikTokApplicationTests.testGetAllTypes.executor": "Run",
+    "JUnit.TikTokApplicationTests.testGetVideosByTypeId.executor": "Run",
+    "JUnit.TikTokApplicationTests.testHotRank.executor": "Run",
+    "JUnit.TikTokApplicationTests.testMail.executor": "Run",
+    "JUnit.TikTokApplicationTests.testSnow.executor": "Run",
+    "JUnit.TikTokApplicationTests.testUploadFile.executor": "Run",
+    "Maven.TikTok [clean].executor": "Run",
+    "Maven.TikTok [compile].executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.TikTokApplication.executor": "Run",
+    "extract.method.default.visibility": "private",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/saveFile/tiktok",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
+    ],
+    "RunConfigurationTargetLRU": [
+      "1a346684-3306-47da-89df-193a7c1445c6"
+    ],
+    "com.intellij.ide.scratch.LRUPopupBuilder$1/SQL Dialect": [
+      "MySQL"
+    ]
+  }
+}]]></component>
+  <component name="RunManager" selected="Spring Boot.TikTokApplication">
+    <configuration name="TikTokApplicationTests.getHotVideo" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="TikTok-backEnd" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.tiktok.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.tiktok" />
+      <option name="MAIN_CLASS_NAME" value="org.example.tiktok.TikTokApplicationTests" />
+      <option name="METHOD_NAME" value="getHotVideo" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TikTokApplicationTests.initDataBaseFromAliOss" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="TikTok-backEnd" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.tiktok.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.tiktok" />
+      <option name="MAIN_CLASS_NAME" value="org.example.tiktok.TikTokApplicationTests" />
+      <option name="METHOD_NAME" value="initDataBaseFromAliOss" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TikTokApplicationTests.testGetAllTypes" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="TikTok-backEnd" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.tiktok.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.tiktok" />
+      <option name="MAIN_CLASS_NAME" value="org.example.tiktok.TikTokApplicationTests" />
+      <option name="METHOD_NAME" value="testGetAllTypes" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TikTokApplicationTests.testGetVideosByTypeId" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="TikTok-backEnd" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.tiktok.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.tiktok" />
+      <option name="MAIN_CLASS_NAME" value="org.example.tiktok.TikTokApplicationTests" />
+      <option name="METHOD_NAME" value="testGetVideosByTypeId" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TikTokApplicationTests.testHotRank" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="TikTok-backEnd" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.tiktok.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.tiktok" />
+      <option name="MAIN_CLASS_NAME" value="org.example.tiktok.TikTokApplicationTests" />
+      <option name="METHOD_NAME" value="testHotRank" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TikTokApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="TikTok-backEnd" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="org.example.tiktok.TikTokApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.TikTokApplicationTests.testGetVideosByTypeId" />
+        <item itemvalue="JUnit.TikTokApplicationTests.getHotVideo" />
+        <item itemvalue="JUnit.TikTokApplicationTests.testGetAllTypes" />
+        <item itemvalue="JUnit.TikTokApplicationTests.testHotRank" />
+        <item itemvalue="JUnit.TikTokApplicationTests.initDataBaseFromAliOss" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="16d94950-9ab0-4a61-93d2-ce6bbcc2424d" name="Changes" comment="" />
+      <created>1747067869068</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1747067869068</updated>
+      <workItem from="1747067870231" duration="1347000" />
+      <workItem from="1747129686420" duration="7261000" />
+      <workItem from="1747213179515" duration="8146000" />
+      <workItem from="1747242549460" duration="941000" />
+      <workItem from="1747269353288" duration="169000" />
+      <workItem from="1747269533931" duration="3363000" />
+      <workItem from="1747320271159" duration="2419000" />
+      <workItem from="1747388130893" duration="26921000" />
+      <workItem from="1748178860192" duration="6909000" />
+      <workItem from="1748242989885" duration="574000" />
+      <workItem from="1748245966159" duration="13297000" />
+      <workItem from="1748278146848" duration="645000" />
+      <workItem from="1748278826576" duration="10122000" />
+      <workItem from="1748350815904" duration="690000" />
+      <workItem from="1748351514526" duration="56479000" />
+      <workItem from="1748675766658" duration="13613000" />
+      <workItem from="1748759177808" duration="49486000" />
+      <workItem from="1748951779412" duration="3000" />
+      <workItem from="1749003311899" duration="5170000" />
+      <workItem from="1749013752168" duration="7410000" />
+      <workItem from="1749042330161" duration="442000" />
+      <workItem from="1749082980400" duration="1746000" />
+      <workItem from="1750051714845" duration="4000" />
+      <workItem from="1753294162353" duration="264000" />
+      <workItem from="1753294922937" duration="46000" />
+      <workItem from="1753295634444" duration="197000" />
+      <workItem from="1753296065439" duration="137000" />
+      <workItem from="1755860385311" duration="68000" />
+      <workItem from="1756814532681" duration="1505000" />
+      <workItem from="1759304791583" duration="13000" />
+      <workItem from="1764264953360" duration="380000" />
+      <workItem from="1765559968231" duration="1429000" />
+      <workItem from="1766919684257" duration="3000" />
+      <workItem from="1767188146939" duration="157000" />
+      <workItem from="1771797718722" duration="63000" />
+      <workItem from="1772897060492" duration="40000" />
+      <workItem from="1772898643199" duration="3573000" />
+      <workItem from="1773860332206" duration="764000" />
+      <workItem from="1774089419011" duration="1175000" />
+    </task>
+    <task id="LOCAL-00001" summary="write basic pom and yaml file ,create class Result">
+      <option name="closed" value="true" />
+      <created>1747069084996</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1747069084996</updated>
+    </task>
+    <task id="LOCAL-00002" summary="create baseEntity, Result, User, Video class">
+      <option name="closed" value="true" />
+      <created>1747132812699</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1747132812699</updated>
+    </task>
+    <task id="LOCAL-00003" summary="create userService registry getCaptcha sendMail">
+      <option name="closed" value="true" />
+      <created>1747320371358</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1747320371358</updated>
+    </task>
+    <task id="LOCAL-00004" summary="create initialize.sql to create table in database">
+      <option name="closed" value="true" />
+      <created>1747329333463</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1747329333463</updated>
+    </task>
+    <task id="LOCAL-00005" summary="finish loginService">
+      <option name="closed" value="true" />
+      <created>1747397071144</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1747397071144</updated>
+    </task>
+    <task id="LOCAL-00006" summary="finish history service">
+      <option name="closed" value="true" />
+      <created>1747421415033</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1747421415033</updated>
+    </task>
+    <task id="LOCAL-00007" summary="此时已完成：视频：收藏夹，分类，浏览记录，点赞视频，获取视频信息&#10;用户：登录/注册 找回密码&#10;两个拦截器以及一些工具类">
+      <option name="closed" value="true" />
+      <created>1748179645170</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1748179645170</updated>
+    </task>
+    <task id="LOCAL-00008" summary="finish delete video">
+      <option name="closed" value="true" />
+      <created>1748180728817</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1748180728817</updated>
+    </task>
+    <task id="LOCAL-00009" summary="finish delete video and fix delVideo controller bug">
+      <option name="closed" value="true" />
+      <created>1748180774578</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1748180774578</updated>
+    </task>
+    <task id="LOCAL-00010" summary="finish shareVideo searchVideo">
+      <option name="closed" value="true" />
+      <created>1748248239999</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1748248239999</updated>
+    </task>
+    <task id="LOCAL-00011" summary="finish getCurrentUserFavourite, getFavouriteById, changeOrAddFavourite, deleteFavourite">
+      <option name="closed" value="true" />
+      <created>1748251791236</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1748251791236</updated>
+    </task>
+    <task id="LOCAL-00012" summary="finish subscribeVideoType service">
+      <option name="closed" value="true" />
+      <created>1748255590049</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1748255590049</updated>
+    </task>
+    <task id="LOCAL-00013" summary="finish upload avatar to aliyun and fix some bugs include lombok doesn't work, write an upload file test">
+      <option name="closed" value="true" />
+      <created>1748322165505</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1748322165505</updated>
+    </task>
+    <task id="LOCAL-00014" summary="fix security issues">
+      <option name="closed" value="true" />
+      <created>1748323110921</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1748323110921</updated>
+    </task>
+    <task id="LOCAL-00015" summary="fix security issues">
+      <option name="closed" value="true" />
+      <created>1748323642281</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1748323642281</updated>
+    </task>
+    <task id="LOCAL-00016" summary="fix security issues">
+      <option name="closed" value="true" />
+      <created>1748323779061</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1748323779061</updated>
+    </task>
+    <task id="LOCAL-00017" summary="test">
+      <option name="closed" value="true" />
+      <created>1748324419081</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1748324419081</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Revert &quot;finish upload avatar to aliyun and fix some bugs include lombok doesn't work, write an upload file test&quot;&#10;&#10;This reverts commit 0c3ad448">
+      <option name="closed" value="true" />
+      <created>1748324786252</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1748324786252</updated>
+    </task>
+    <task id="LOCAL-00019" summary="test">
+      <option name="closed" value="true" />
+      <created>1748337422897</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1748337422897</updated>
+    </task>
+    <task id="LOCAL-00020" summary="test">
+      <option name="closed" value="true" />
+      <created>1748350970205</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1748350970205</updated>
+    </task>
+    <task id="LOCAL-00021" summary="test">
+      <option name="closed" value="true" />
+      <created>1748351179551</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1748351179551</updated>
+    </task>
+    <task id="LOCAL-00022" summary="test is reset work">
+      <option name="closed" value="true" />
+      <created>1748352047121</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1748352047121</updated>
+    </task>
+    <task id="LOCAL-00023" summary="test is reset work">
+      <option name="closed" value="true" />
+      <created>1748352608843</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1748352608843</updated>
+    </task>
+    <task id="LOCAL-00024" summary="finish get user's current followers, update user info">
+      <option name="closed" value="true" />
+      <created>1748355820737</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1748355820737</updated>
+    </task>
+    <task id="LOCAL-00025" summary="finish get user follow, follow/unfollow">
+      <option name="closed" value="true" />
+      <created>1748360656449</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1748360656449</updated>
+    </task>
+    <task id="LOCAL-00026" summary="finish delete searchName and get searchName">
+      <option name="closed" value="true" />
+      <created>1748420151661</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1748420151661</updated>
+    </task>
+    <task id="LOCAL-00027" summary="fix some bugs in mapper, compose public methods--logical expire, pass through, set , set with logical expire">
+      <option name="closed" value="true" />
+      <created>1748428694274</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1748428694274</updated>
+    </task>
+    <task id="LOCAL-00028" summary="添加互关,fix bugs">
+      <option name="closed" value="true" />
+      <created>1748435256260</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1748435256260</updated>
+    </task>
+    <task id="LOCAL-00029" summary="完成了查询主页视频">
+      <option name="closed" value="true" />
+      <created>1748440282822</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1748440282823</updated>
+    </task>
+    <task id="LOCAL-00030" summary="finish comment">
+      <option name="closed" value="true" />
+      <created>1748451192885</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1748451192885</updated>
+    </task>
+    <task id="LOCAL-00031" summary="评论/回复评论 查询视频下的评论 点赞/取消点赞">
+      <option name="closed" value="true" />
+      <created>1748453034706</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1748453034706</updated>
+    </task>
+    <task id="LOCAL-00032" summary="finish all comment">
+      <option name="closed" value="true" />
+      <created>1748521959204</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1748521959204</updated>
+    </task>
+    <task id="LOCAL-00033" summary="finish hot rank">
+      <option name="closed" value="true" />
+      <created>1748538742503</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1748538742503</updated>
+    </task>
+    <task id="LOCAL-00034" summary="finish some push and upload">
+      <option name="closed" value="true" />
+      <created>1748699540280</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1748699540280</updated>
+    </task>
+    <task id="LOCAL-00035" summary="finish almost all exclude details in interceptor">
+      <option name="closed" value="true" />
+      <created>1748702264780</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1748702264780</updated>
+    </task>
+    <task id="LOCAL-00036" summary="fix details">
+      <option name="closed" value="true" />
+      <created>1748759099008</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1748759099008</updated>
+    </task>
+    <task id="LOCAL-00037" summary="fix some bugs and initialize data in db">
+      <option name="closed" value="true" />
+      <created>1748865210318</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1748865210318</updated>
+    </task>
+    <task id="LOCAL-00038" summary="change some sql, make front end more easy">
+      <option name="closed" value="true" />
+      <created>1749039967939</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1749039967939</updated>
+    </task>
+    <task id="LOCAL-00039" summary="fix some code, make sql more efficient">
+      <option name="closed" value="true" />
+      <created>1774089456830</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1774089456830</updated>
+    </task>
+    <task id="LOCAL-00040" summary="change project name">
+      <option name="closed" value="true" />
+      <created>1774089759236</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1774089759236</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="HEAD" />
+                </option>
+              </RecentGroup>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="origin/master" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="finish getCurrentUserFavourite, getFavouriteById, changeOrAddFavourite, deleteFavourite" />
+    <MESSAGE value="finish subscribeVideoType service" />
+    <MESSAGE value="finish upload avatar to aliyun and fix some bugs include lombok doesn't work, write an upload file test" />
+    <MESSAGE value="fix security issues" />
+    <MESSAGE value="Revert &quot;finish upload avatar to aliyun and fix some bugs include lombok doesn't work, write an upload file test&quot;&#10;&#10;This reverts commit 0c3ad448" />
+    <MESSAGE value="Merge branch 'master' of https://github.com/MakiseKurisu9/tiktok&#10;&#10;# Conflicts:&#10;#&#9;TikTok/src/test/java/org/example/tiktok/TikTokApplicationTests.java" />
+    <MESSAGE value="test" />
+    <MESSAGE value="test is reset work" />
+    <MESSAGE value="finish get user's current followers, update user info" />
+    <MESSAGE value="finish get user follow, follow/unfollow" />
+    <MESSAGE value="finish delete searchName and get searchName" />
+    <MESSAGE value="fix some bugs in mapper, compose public methods--logical expire, pass through, set , set with logical expire" />
+    <MESSAGE value="添加互关,fix bugs" />
+    <MESSAGE value="完成了查询主页视频" />
+    <MESSAGE value="finish comment" />
+    <MESSAGE value="评论/回复评论 查询视频下的评论 点赞/取消点赞" />
+    <MESSAGE value="finish all comment" />
+    <MESSAGE value="finish hot rank" />
+    <MESSAGE value="finish some push and upload" />
+    <MESSAGE value="finish almost all exclude details in interceptor" />
+    <MESSAGE value="fix details" />
+    <MESSAGE value="fix some bugs and initialize data in db" />
+    <MESSAGE value="change some sql, make front end more easy" />
+    <MESSAGE value="fix some code, make sql more efficient" />
+    <MESSAGE value="change project name" />
+    <option name="LAST_COMMIT_MESSAGE" value="change project name" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
