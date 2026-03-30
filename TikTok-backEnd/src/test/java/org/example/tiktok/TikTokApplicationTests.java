@@ -22,10 +22,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -71,93 +74,131 @@ class TikTokApplicationTests {
     void initDataBaseFromAliOss() {
         // === 1. OSS 客户端配置 ===
         // 通过控制台获取你的 AccessKeyId/AccessKeySecret
-        String accessKeyId = AccessKeyId;
-        String accessKeySecret = AccessKeySecret;
-        // OSS Endpoint（去掉前缀 protocol，仅保留域名）
-        String endpoint       = "oss-cn-shanghai.aliyuncs.com";
-        // Bucket 名称，根据你的 URL 可知：bucket 为 save-avatar
-        String bucketName     = "save-avatar";
-        // 该前缀指向你想列举的目录：/video/JuClubFootball/ 下的所有对象
-        String prefix = "video/song/";
+        //pet song football car battle tech
+        String[] vTypes = {"pet", "song", "football", "car", "battle", "tech"};
 
-        // 初始化 OSSClient
-        OSS ossClient = new OSSClientBuilder().build("https://" + endpoint, accessKeyId, accessKeySecret);
+        for (String vType : vTypes) {
+            String accessKeyId = AccessKeyId;
+            String accessKeySecret = AccessKeySecret;
+            // OSS Endpoint（去掉前缀 protocol，仅保留域名）
+            String endpoint = "oss-cn-shanghai.aliyuncs.com";
+            // Bucket 名称，根据你的 URL 可知：bucket 为 save-avatar
+            String bucketName = "tiktok-personal";
+            // 该前缀指向你想列举的目录：/video/JuClubFootball/ 下的所有对象
+            String prefix = "video/" + vType + "/";  // 注意末尾的斜杠，表示这是一个目录
 
-        // === 2. 列出所有目标视频对象 Key ===
-        List<String> allVideoKeys = new ArrayList<>();
-        String nextMarker = null;
-        int maxKeys = 1000;
+            // 初始化 OSSClient
+            OSS ossClient = new OSSClientBuilder().build("https://" + endpoint, accessKeyId, accessKeySecret);
 
-        do {
-            ListObjectsRequest listReq = new ListObjectsRequest(bucketName)
-                    .withPrefix(prefix)
-                    .withMarker(nextMarker)
-                    .withMaxKeys(maxKeys);
-            ObjectListing listing = ossClient.listObjects(listReq);
+            // === 2. 列出所有目标视频对象 Key ===
+            List<String> allVideoKeys = new ArrayList<>();
+            String nextMarker = null;
+            int maxKeys = 1000;
 
-            for (OSSObjectSummary summary : listing.getObjectSummaries()) {
-                String key = summary.getKey();
-                // 根据需要，只保留常见视频后缀（例如 .mp4、.avi、.mkv）。若目录中只有视频，可省略后缀判断。
-                if (key.endsWith(".mp4") || key.endsWith(".avi") || key.endsWith(".mkv")) {
-                    allVideoKeys.add(key);
+            do {
+                ListObjectsRequest listReq = new ListObjectsRequest(bucketName)
+                        .withPrefix(prefix)
+                        .withMarker(nextMarker)
+                        .withMaxKeys(maxKeys);
+                ObjectListing listing = ossClient.listObjects(listReq);
+
+                for (OSSObjectSummary summary : listing.getObjectSummaries()) {
+                    String key = summary.getKey();
+                    // 根据需要，只保留常见视频后缀（例如 .mp4、.avi、.mkv）。若目录中只有视频，可省略后缀判断。
+                    if (key.endsWith(".mp4") || key.endsWith(".avi") || key.endsWith(".mkv")) {
+                        allVideoKeys.add(key);
+                    }
+                }
+                nextMarker = listing.getNextMarker();
+            } while (nextMarker != null && !nextMarker.isEmpty());
+
+            System.out.println("找到视频文件数量：" + allVideoKeys.size());
+
+            // === 3. 为每个 ObjectKey 生成可访问的 URL ===
+            // 假设你的 Bucket 已设置为“公众读”，我们直接拼接公开 URL：
+            //    https://{bucketName}.{endpoint}/{objectKey}
+            List<String> videoUrls = new ArrayList<>(allVideoKeys.size());
+            String urlPattern = "https://%s.%s/%s";
+            for (String key : allVideoKeys) {
+                String url = String.format(urlPattern, bucketName, endpoint, key);
+                videoUrls.add(url);
+            }
+            System.out.println(videoUrls);
+            for (int i = 0; i < allVideoKeys.size(); i++) {
+                String objectKey = allVideoKeys.get(i);
+                String videoUrl = videoUrls.get(i);
+
+                // 从 objectKey 中提取文件名作为 title，比如 "video/JuClubFootball/match1.mp4" -> "match1.mp4"
+                String fileName = objectKey.substring(objectKey.lastIndexOf('/') + 1);
+
+                // 实例化 Video 对象并设置属性
+                Video video = new Video();
+                video.setTitle(fileName);
+                video.setDescription("");   // 暂时留空，可根据需求填写
+
+                video.setType(vType);
+                video.setSource(videoUrl);        // 将 URL 存到 source 字段
+                video.setImgSource("");           // 如果有缩略图地址可填写，否则留空
+                video.setVideoTypeId(1L);         // 示例：全部设置为 1，你也可以根据目录或后缀来决定类别
+                video.setPublisherId(10L);         // 示例：发布者 ID，若每个视频同一个发布者，可设固定值
+
+                // ★ 在这里随机生成 0～10000 之间的数值 ★
+                long randomLikes = ThreadLocalRandom.current().nextLong(0, 10001);
+                long randomViews = ThreadLocalRandom.current().nextLong(0, 10001);
+                long randomFavourites = ThreadLocalRandom.current().nextLong(0, 10001);
+                long randomShares = ThreadLocalRandom.current().nextLong(0, 10001);
+
+                video.setLikes(randomLikes);
+                video.setViews(randomViews);
+                video.setFavourites(randomFavourites);
+                video.setShares(randomShares);
+                video.setCreateTime(LocalDateTime.now());
+                video.setUpdateTime(LocalDateTime.now());
+                video.setComments(0L);            // 如果你在表里配置了 comments 字段，可留空
+                video.setPublisherId(10L);
+                video.setPublisherName("admin");
+
+                // 调用 MyBatis Mapper 将这条记录插入到数据库
+                videoMapper.addVideo(video);
+                // 关闭 OSSClient
+                ossClient.shutdown();
+                System.out.println("所有视频已插入数据库。");
+            }
+        }
+    }
+
+
+    @Test
+    public void RenameFiles() {
+        File folder = new File("D:/videoForProject/car"); // Change this to your directory
+        File[] files = folder.listFiles();
+        int counter = 1;
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile()) {
+                    String extension = "";
+                    String fileName = file.getName();
+
+                    // Get file extension
+                    int dotIndex = fileName.lastIndexOf('.');
+                    if (dotIndex > 0) {
+                        extension = fileName.substring(dotIndex); // Get the file extension
+                    }
+
+                    // Create new file name: football (1), football (2), etc.
+                    String newName = "luxury car (" + counter + ")" + extension;
+                    File renamedFile = new File(folder, newName);
+
+                    if (file.renameTo(renamedFile)) {
+                        System.out.println("Renamed: " + fileName + " to " + newName);
+                    } else {
+                        System.out.println("Failed to rename: " + fileName);
+                    }
+                    counter++;  // Increment counter for next file
                 }
             }
-            nextMarker = listing.getNextMarker();
-        } while (nextMarker != null && !nextMarker.isEmpty());
-
-        System.out.println("找到视频文件数量：" + allVideoKeys.size());
-
-        // === 3. 为每个 ObjectKey 生成可访问的 URL ===
-        // 假设你的 Bucket 已设置为“公众读”，我们直接拼接公开 URL：
-        //    https://{bucketName}.{endpoint}/{objectKey}
-        List<String> videoUrls = new ArrayList<>(allVideoKeys.size());
-        String urlPattern = "https://%s.%s/%s";
-        for (String key : allVideoKeys) {
-            String url = String.format(urlPattern, bucketName, endpoint, key);
-            videoUrls.add(url);
         }
-        System.out.println(videoUrls);
-        for (int i = 0; i < allVideoKeys.size(); i++) {
-            String objectKey = allVideoKeys.get(i);
-            String videoUrl  = videoUrls.get(i);
-
-            // 从 objectKey 中提取文件名作为 title，比如 "video/JuClubFootball/match1.mp4" -> "match1.mp4"
-            String fileName = objectKey.substring(objectKey.lastIndexOf('/') + 1);
-
-            // 实例化 Video 对象并设置属性
-            Video video = new Video();
-            video.setTitle(fileName);
-            video.setDescription("");   // 暂时留空，可根据需求填写
-            // 从文件名提取后缀作为 type，比如 "match1.mp4" -> "mp4"
-            video.setType("song");
-            video.setSource(videoUrl);        // 将 URL 存到 source 字段
-            video.setImgSource("");           // 如果有缩略图地址可填写，否则留空
-            video.setVideoTypeId(1L);         // 示例：全部设置为 1，你也可以根据目录或后缀来决定类别
-            video.setPublisherId(10L);         // 示例：发布者 ID，若每个视频同一个发布者，可设固定值
-
-            // ★ 在这里随机生成 0～10000 之间的数值 ★
-            long randomLikes      = ThreadLocalRandom.current().nextLong(0, 10001);
-            long randomViews      = ThreadLocalRandom.current().nextLong(0, 10001);
-            long randomFavourites = ThreadLocalRandom.current().nextLong(0, 10001);
-            long randomShares     = ThreadLocalRandom.current().nextLong(0, 10001);
-
-
-
-            video.setLikes(randomLikes);
-            video.setViews(randomViews);
-            video.setFavourites(randomFavourites);
-            video.setShares(randomShares);
-            video.setCreateTime(LocalDateTime.now());
-            video.setUpdateTime(LocalDateTime.now());
-            video.setComments(0L);            // 如果你在表里配置了 comments 字段，可留空
-
-            // 调用 MyBatis Mapper 将这条记录插入到数据库
-            videoMapper.addVideo(video);
-        }
-
-        // 关闭 OSSClient
-        ossClient.shutdown();
-        System.out.println("所有视频已插入数据库。");
 
     }
 
@@ -182,6 +223,8 @@ class TikTokApplicationTests {
             e.printStackTrace();
         }
     }
+
+
     @Test
     public void testSnow() {
         System.out.println(snowflakeIdWorker.nextId());
