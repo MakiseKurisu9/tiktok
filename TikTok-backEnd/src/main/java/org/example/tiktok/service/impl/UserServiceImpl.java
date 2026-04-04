@@ -1,6 +1,13 @@
 package org.example.tiktok.service.impl;
 
 import com.google.code.kaptcha.Producer;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +21,7 @@ import org.example.tiktok.utils.EmailValidator;
 import org.example.tiktok.utils.JwtUtils;
 import org.example.tiktok.utils.PasswordUtils;
 import org.example.tiktok.utils.UserHolder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -33,8 +41,10 @@ import static org.example.tiktok.utils.SystemConstant.*;
 @Slf4j
 public class UserServiceImpl implements LoginService {
 
-    @Resource
-    private JavaMailSender javaMailSender;
+
+
+    @Value("${spring.mail.sendgrid.api-key}")
+    private String sendGridApiKey;
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -143,15 +153,31 @@ public class UserServiceImpl implements LoginService {
             return Result.fail("请输入正确的邮箱格式");
         }
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setSubject("Login code");
             String mailCode = RandomStringUtils.randomNumeric(6);
-            message.setText("Your code is " + mailCode + ", please input in five minutes");
-            message.setTo(mail);
-            message.setFrom(FROM_MAIL);
-            javaMailSender.send(message);
-            stringRedisTemplate.opsForValue().set(MAIL_CODE_PREFIX + mail,mailCode,5,TimeUnit.MINUTES);
-            return Result.ok("email code send success");
+
+            Email from = new Email(FROM_MAIL);
+            Email to = new Email(mail);
+            String subject = "Login code";
+            String content = "Your code is " + mailCode + ", please input in five minutes";
+            Content body = new Content("text/plain", content);
+            Mail mailMessage = new Mail(from, subject, to, body);
+
+            SendGrid sg = new SendGrid(sendGridApiKey);
+            Request request = new Request();
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mailMessage.build());
+
+            Response response = sg.api(request);
+
+            if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
+                stringRedisTemplate.opsForValue()
+                        .set(MAIL_CODE_PREFIX + mail, mailCode, 5, TimeUnit.MINUTES);
+                return Result.ok("email code send success");
+            } else {
+                log.error("SendGrid error: {} {}", response.getStatusCode(), response.getBody());
+                return Result.fail("邮件发送失败: " + response.getStatusCode());
+            }
         } catch (Exception e) {
             return Result.fail(e.getMessage());
         }

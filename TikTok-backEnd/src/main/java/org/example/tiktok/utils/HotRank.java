@@ -76,8 +76,8 @@ public class HotRank {
 
     @Scheduled(cron = "0 0 0 * * ?") // 每天 0 点执行一次
     public void calculateEvery3Days() throws JsonProcessingException {
-        //每三天更新一次
-        if (LocalDate.now().getDayOfYear() % 3 != 0) return;
+        //如果投入实际使用
+        //if (LocalDate.now().getDayOfYear() % 3 != 0) return;
         PageBean<Video> recentHot = getRecentHotVideo(1,10);
         log.info("三日热点视频更新成功，共 {} 条", recentHot.getTotal());
     }
@@ -87,20 +87,27 @@ public class HotRank {
         List<Video> allVideos = videoMapper.getAllVideos();
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
 
-         List<Video> result =
-                 allVideos.stream()
-                .filter(video -> video.getCreateTime().isAfter(threeDaysAgo))
-                .filter(v -> {
-                    double score = computeHotScore(v);
-                    return score > HOT_LIMIT;
-                })
-                .sorted((v1,v2) -> {
-                    double score1 = computeHotScore(v1);
-                    double score2 = computeHotScore(v2);
-                    return Double.compare(score2,score1);
-                })
-                .collect(Collectors.toList());
-         Collections.shuffle(result);
+        List<Video> recentVideos = allVideos.stream()
+                .filter(v -> v.getCreateTime().isAfter(threeDaysAgo))
+                .toList();
+
+        List<Video> result;
+
+        if (!recentVideos.isEmpty()) {
+            result = recentVideos.stream()
+                    .filter(v -> computeHotScore(v) > HOT_LIMIT)
+                    .sorted((v1, v2) ->
+                            Double.compare(computeHotScore(v2), computeHotScore(v1)))
+                    .collect(Collectors.toList());
+        } else {
+            // ❗ fallback：使用所有视频
+            result = allVideos.stream()
+                    .sorted((v1, v2) ->
+                            Double.compare(computeHotScore(v2), computeHotScore(v1)))
+                    .collect(Collectors.toList());
+        }
+
+
         int fromIndex = Math.min((pageNum - 1) * pageSize, result.size());
         int toIndex = Math.min(fromIndex + pageSize, result.size());
         List<Video> pagedVideos = result.subList(fromIndex, toIndex);

@@ -243,7 +243,6 @@ class TikTokApplicationTests {
     @Test
     public void testGetAllTypes() {
         Result allVideoTypes = indexService.getAllVideoTypes();
-
         System.out.println(allVideoTypes);
     }
 
@@ -252,8 +251,6 @@ class TikTokApplicationTests {
         Result videosByTypeId = indexService.getVideosByTypeId(1L, 1, 10);
         System.out.println(videosByTypeId.getData());
     }
-
-
 
     @Test
     public void testHotRank() throws JsonProcessingException {
