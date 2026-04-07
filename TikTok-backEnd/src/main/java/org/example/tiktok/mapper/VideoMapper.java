@@ -17,9 +17,13 @@ public interface VideoMapper {
     @Insert("insert into favourite_video_relation(fid, vid) values (#{favouriteTableId},#{videoId})")
     void addVideoIntoFavouriteTable(@Param("favouriteTableId")Long favouriteTableId,@Param("videoId")Long videoId);
 
+    @Update("update favourite set video_count = video_count + #{delta} where id = #{favouriteTableId}")
+    void updateFavouriteTableVideoCount(@Param("favouriteTableId")Long favouriteTableId,@Param("delta") int delta);
+
     @Select("select * from favourite_video_relation where vid = #{videoId} and fid = #{favouriteTableId}")
     Integer isVideoInFavouriteTable(@Param("favouriteTableId")Long favouriteTableId,@Param("videoId") Long videoId);
-//in xml
+
+    //in xml
     List<Video> getVideosByVideoIds(@Param("ids") List<Long> ids);
 
     @Update("update video set likes = likes + 1 where video.id = #{videoId}")

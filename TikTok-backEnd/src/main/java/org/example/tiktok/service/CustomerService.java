@@ -26,7 +26,7 @@ public interface CustomerService {
     Result getUserInfoByUserId(Long userId) throws JsonProcessingException;
 
 
-    Result updateUserInfo(String nickName, String avatarSource, String sex, String userDescription) throws JsonProcessingException;
+    Result updateUserInfo(String nickname, String avatarSource, String sex, String userDescription) throws JsonProcessingException;
 
     Result getFollow(Integer page, Integer limit);
 

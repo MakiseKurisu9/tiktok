@@ -12,8 +12,8 @@ public class PublicInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if(UserHolder.getUser() == null ) {
+            System.out.println("PublicInterceptor: user is null, access denied");
             response.setStatus(401);
-            System.out.println("interceptor affect for test");
             return false;
         }
         return true;

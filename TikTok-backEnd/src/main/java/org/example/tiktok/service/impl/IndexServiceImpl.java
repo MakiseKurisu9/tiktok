@@ -281,22 +281,43 @@ public class IndexServiceImpl implements IndexService {
         String key = "user:model:" + userId;
         String json = stringRedisTemplate.opsForValue().get(key);
 
-        List<Video> videos = new ArrayList<>();
+        List<Video> videos ;
 
         if(json == null || json.isEmpty()) {
             videos = indexMapper.getRandomVideos();
         } else {
             UserModel model = objectMapper.readValue(json, UserModel.class);
             Map<Long,Double> interestMap = model.getModel();
+            // Pick more tag types to get better variety
+            List<Long> tagIds = getRandomTagIds(interestMap,Math.min(interestMap.size(),5));
 
-            List<Long> tagIds = getRandomTagIds(interestMap,3);
+            // Fetch proportionally per tag based on interest weight
+            videos = fetchVideosByWeight(interestMap, tagIds, 30);
 
-            videos = indexMapper.getVideosByTagIds(tagIds,100);
-
+            // Shuffle so pet/football aren't grouped
+            Collections.shuffle(videos);
         }
 
         return Result.ok("successfully get videos you may like",videos);
     }
+
+    private List<Video> fetchVideosByWeight(Map<Long, Double> interestMap, List<Long> tagIds, int total) {
+        double weightSum = tagIds.stream()
+                .mapToDouble(id -> interestMap.getOrDefault(id, 0.0))
+                .sum();
+
+        List<Video> result = new ArrayList<>();
+        for (Long tagId : tagIds) {
+            double ratio = interestMap.getOrDefault(tagId, 0.0) / weightSum;
+            // Each tag gets a proportional slice, minimum 3 videos
+            int count = Math.max(3, (int) Math.round(ratio * total));
+            List<Video> tagVideos = indexMapper.getRandomVideosByTagId(tagId, count);
+            result.addAll(tagVideos);
+        }
+        return result;
+    }
+
+
 //加点随机 带权随机抽样从用户兴趣分布中选出若干标签，用于生成个性化视频推荐结果
     private List<Long> getRandomTagIds(Map<Long, Double> interestMap, int count) {
         List<Long> tagIds = new ArrayList<>();

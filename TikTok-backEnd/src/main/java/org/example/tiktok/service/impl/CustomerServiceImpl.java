@@ -120,6 +120,8 @@ public class CustomerServiceImpl implements CustomerService {
                 .map(Long::valueOf)
                 .toList();
         Long userId = UserHolder.getUser().getId();
+
+        customerMapper.deleteSubscribeVideoTypesByUserId(userId);
         customerMapper.subscribeVideoTypes(userId,typeIds);
 
         return Result.ok("successfully subscribe");
@@ -140,7 +142,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Result uploadAvatar(MultipartFile file) throws IOException {
         String originalFileName = file.getOriginalFilename();
         String filename = UUID.randomUUID() + originalFileName.substring(originalFileName.lastIndexOf("."));
-        String url = aliOSSUtil.uploadFile(filename,file.getInputStream());
+        String url = aliOSSUtil.uploadFile(filename,file.getInputStream(),"avatar");
         return Result.ok("successfully upload file",url);
     }
 
@@ -162,19 +164,21 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Result updateUserInfo(String nickName, String avatarSource, String sex, String userDescription) throws JsonProcessingException {
+    public Result updateUserInfo(String nickname, String avatarSource, String sex, String userDescription) throws JsonProcessingException {
         Long userId = UserHolder.getUser().getId();
         String key = "customer:user:" + userId;
         User user = new User();
         user.setId(userId);
-        user.setNickname(nickName);
+        user.setNickname(nickname);
         user.setUserDescription(userDescription);
         user.setSex(sex);
         user.setAvatarSource(avatarSource);
         //先操作数据库再操作redis 确保一致性
         customerMapper.updateUserInfo(user);
         stringRedisTemplate.delete(key);
-        cacheClient.set(key,user,2L,TimeUnit.HOURS);
+
+        User fullUser = customerMapper.getUserByUserId(userId);
+        cacheClient.set(key,fullUser,2L,TimeUnit.HOURS);
         return Result.ok("successfully update user info",user);
     }
 
@@ -300,6 +304,7 @@ public class CustomerServiceImpl implements CustomerService {
             // ── 6. Persist back ───────────────────────────────────────────────
             UserModel updated = new UserModel();
             updated.setModel(modelMap);
+            System.out.println(modelMap);
             cacheClient.set(key, updated, 7L, TimeUnit.DAYS);
         } catch (JsonProcessingException e) {
             log.error("Failed to parse user model for userId={}", userId, e);

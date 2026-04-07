@@ -44,4 +44,7 @@ public interface IndexMapper {
     @Select("select * from video order by RAND() limit 100")
     List<Video> getRandomVideos();
 
+    List<Video> getRandomVideosByTagId(@Param("tagId") Long tagId,@Param("limit") int limit);
+
 }
+

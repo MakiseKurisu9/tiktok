@@ -14,17 +14,11 @@ import java.util.UUID;
 public class FileUploadController {
     @Resource
     AliOSSUtil aliOSSUtil;
-    /*const formData = new FormData();
-formData.append('file', videoFile);
-formData.append('type', 'video');
-*/
-    /*const formData = new FormData();
-formData.append('file', avatarFile);
-formData.append('type', 'avatar');*/
+
     @PostMapping("/upload")
     public Result upload(@RequestParam("file") MultipartFile file,
-                         @RequestParam("type") String type) throws Exception {
-        // 判断上传类型，设定目录前缀
+                         @RequestParam("type") String type) {
+        // Validate type
         String dirPrefix;
         if ("avatar".equalsIgnoreCase(type)) {
             dirPrefix = "avatar/";
@@ -34,13 +28,24 @@ formData.append('type', 'avatar');*/
             return Result.fail("Unsupported upload type: " + type);
         }
 
+        // Validate file
+        if (file == null || file.isEmpty()) {
+            return Result.fail("file is empty");
+        }
+
         String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            return Result.fail("invalid file name");
+        }
+
         String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String filename = dirPrefix + UUID.randomUUID().toString() + suffix;
+        String filename = dirPrefix + UUID.randomUUID() + suffix;
 
-        // 上传文件到阿里云 OSS
-        String url = aliOSSUtil.uploadFile(filename, file.getInputStream());
-
-        return Result.ok("Successfully uploaded " + type, url);
+        try {
+            String url = aliOSSUtil.uploadFile(filename, file.getInputStream(), type);
+            return Result.ok("Successfully uploaded " + type, url);
+        } catch (Exception e) {
+            return Result.fail("Upload failed: " + e.getMessage());
+        }
     }
 }

@@ -67,9 +67,9 @@ public class CustomerController {
     }
     /** 更新当前用户信息（昵称、头像、性别、简介） */
     @PutMapping
-    public Result updateUserInfo(String nickName,String avatarSource,
+    public Result updateUserInfo(String nickname,String avatarSource,
                                  String sex, String userDescription) throws JsonProcessingException {
-        return customerService.updateUserInfo(nickName,avatarSource,sex,userDescription);
+        return customerService.updateUserInfo(nickname,avatarSource,sex,userDescription);
     }
 
     /** 获取当前用户关注的用户（分页） */
@@ -104,6 +104,7 @@ public class CustomerController {
      */
     @PostMapping("/updateUserModel")
     public Result updateUserModel(@RequestBody UserModelDTO userModelDTO) throws JsonProcessingException {
+        System.out.println("Received DTO: typeId=" + userModelDTO.getTypeId() + ", score=" + userModelDTO.getScore());
         return customerService.updateUserModel(userModelDTO);
     }
 

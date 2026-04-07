@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.example.tiktok.dto.CommentersDTO;
 import org.example.tiktok.dto.PageBean;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 import static org.example.tiktok.utils.SystemConstant.History_PREFIX;
 
 @Service
+@Slf4j
 public class VideoServiceImpl implements VideoService {
     @Resource
     VideoMapper videoMapper;
@@ -67,10 +69,12 @@ public class VideoServiceImpl implements VideoService {
     @Override
     public Result addVideoIntoFavouriteTable(Long favouriteTableId, Long videoId) {
         Integer isVideoInFavourite = videoMapper.isVideoInFavouriteTable(favouriteTableId, videoId);
-        if(isVideoInFavourite > 0) {
+        if(isVideoInFavourite!=null && isVideoInFavourite > 0) {
             return Result.fail("this video already in this favourite");
         }
         videoMapper.addVideoIntoFavouriteTable(favouriteTableId, videoId);
+        //count+1
+        videoMapper.updateFavouriteTableVideoCount(favouriteTableId,1);
         return Result.ok("add a video into favourite table success");
     }
 
@@ -79,7 +83,7 @@ public class VideoServiceImpl implements VideoService {
         String key = History_PREFIX+ UserHolder.getUser().getId();
 
         //if video exist, first remove then add
-        stringRedisTemplate.opsForList().remove(key,0,videoId);
+        stringRedisTemplate.opsForList().remove(key,0,videoId.toString());
         //make sure video in first place
         stringRedisTemplate.opsForList().leftPush(key,videoId.toString());
 
@@ -111,7 +115,7 @@ public class VideoServiceImpl implements VideoService {
         //顺序还原order preserving
         List<Video> orderedVideos = ids.stream()
                 .map(videoMap::get)
-                .filter(Objects::isNull)
+                .filter(Objects::nonNull)
                 .toList();
         return Result.ok("success get history list",orderedVideos);
     }
@@ -133,11 +137,11 @@ public class VideoServiceImpl implements VideoService {
         } else {
             Boolean isNotStarSuccess = videoMapper.decreaseStarVideo(videoId);
             Boolean isNotLikeSuccess =videoMapper.videoNotLike(videoId,userId);
-            if(isNotStarSuccess && isNotLikeSuccess){
-                stringRedisTemplate.opsForSet().remove(key, userId.toString());
+            if(isNotStarSuccess && isNotLikeSuccess){                stringRedisTemplate.opsForSet().remove(key, userId.toString());
                 return Result.ok("decrease star success");
             }
         }
+
         return Result.fail("star not affect");
     }
 
@@ -306,20 +310,26 @@ public class VideoServiceImpl implements VideoService {
     }
 
     private void setCommentsByUserMap(List<Comment> comments) {
-        Set<Long> userIds = comments.stream()
-                .map(Comment::getFromUserId)
-                .collect(Collectors.toSet());
+        try {
+            Set<Long> userIds = comments.stream()
+                    .map(Comment::getFromUserId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
 
-        List<CommentersDTO> users = videoMapper.getUsersByIds(new ArrayList<>(userIds));
+            List<CommentersDTO> users = videoMapper.getUsersByIds(new ArrayList<>(userIds));
 
-        Map<Long,CommentersDTO> userMap = users.stream().
-                collect(Collectors.toMap(CommentersDTO::getId,user -> user)
-        );
+            Map<Long, CommentersDTO> userMap = users.stream().
+                    collect(Collectors.toMap(CommentersDTO::getId, user -> user)
+                    );
 
 
-        for(Comment comment : comments) {
-            comment.setCommentersDTO(userMap.get(comment.getFromUserId()));
-            isCommentLiked(comment);
+            for (Comment comment : comments) {
+                comment.setCommentersDTO(userMap.get(comment.getFromUserId()));
+                isCommentLiked(comment);
+            }
+        } catch (Exception e) {
+            //日志记录异常
+            log.error("Error setting comment user map" ,e);
         }
     }
 
@@ -379,7 +389,7 @@ public class VideoServiceImpl implements VideoService {
 
     private void isCommentLiked(Comment comment) {
         Long userId = UserHolder.getUser().getId();
-        String key = "comment:liked:" + comment.getId();
+        String key = "comment:liked:" + comment.getId().toString();
         Boolean isMember = stringRedisTemplate.opsForSet().isMember(key,userId.toString());
         comment.setIsLiked(BooleanUtils.isTrue(isMember));
     }

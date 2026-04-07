@@ -35,6 +35,9 @@ public interface CustomerMapper {
 
     void subscribeVideoTypes(@Param("userId") Long userId,@Param("typeIds") List<Long> typeIds);
 
+    @Delete("delete from subscribe_video_type where user_id = #{userId}")
+    void deleteSubscribeVideoTypesByUserId(Long userId);
+
     //返回的是订阅的视频分类id
     @Select("select video_type_id from subscribe_video_type where user_id = #{userId}")
     List<Long> getSubscribeByUserId(Long userId);
@@ -45,7 +48,7 @@ public interface CustomerMapper {
     User getUserByUserId(Long userId);
 
     @Update("update user set nickname=#{nickname},avatar_source=#{avatarSource}," +
-            "sex=#{sex},user_description=#{userDescription},create_time=NOW()" +
+            "sex=#{sex},user_description=#{userDescription},update_time=NOW()" +
             " where id = #{id}")
     void updateUserInfo(User user);
 

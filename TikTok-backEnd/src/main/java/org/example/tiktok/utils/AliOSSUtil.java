@@ -12,25 +12,30 @@ import java.io.InputStream;
 @Component
 public class AliOSSUtil {
     private static final String ENDPOINT = "https://oss-cn-shanghai.aliyuncs.com";
-    // 从环境变量中获取访问凭证。运行本代码示例之前，请确保已设置环境变量OSS_ACCESS_KEY_ID和OSS_ACCESS_KEY_SECRET。
-    //EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
+
     @Value("${aliyun.oss.access-key-id}")
     private String accessKeyId;
 
     @Value("${aliyun.oss.access-key-secret}")
     private String accessKeySecret;
 
-    // 填写Bucket名称，例如examplebucket。
-    private static final String BUCKET_NAME = "save-avatar";
+    private static final String AVATAR_BUCKET = "save-avatar-tiktok";
+    private static final String VIDEO_BUCKET = "tiktok-personal";
 
-    public String uploadFile(String objectName, InputStream in) {
-        OSS ossClient = new OSSClientBuilder().build(ENDPOINT,accessKeyId,accessKeySecret );
-        String url = "";
-        PutObjectRequest putObjectRequest = new PutObjectRequest(BUCKET_NAME, objectName, in);
-        PutObjectResult result = ossClient.putObject(putObjectRequest);
-        //url组成：https://bucket名称.区域节点/objectName
-        url = "https://"+BUCKET_NAME+"."+ENDPOINT.substring(ENDPOINT.lastIndexOf("/")+1)+"/"+objectName;
-        ossClient.shutdown();
-        return url;
+    public String uploadFile(String objectName, InputStream in, String type) {
+        String bucketName = "video".equalsIgnoreCase(type) ? VIDEO_BUCKET : AVATAR_BUCKET;
+
+        OSS ossClient = new OSSClientBuilder().build(ENDPOINT, accessKeyId, accessKeySecret);
+        try {
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, objectName, in);
+            ossClient.putObject(putObjectRequest);
+            return "https://" + bucketName + "."
+                    + ENDPOINT.substring(ENDPOINT.lastIndexOf("/") + 1)
+                    + "/" + objectName;
+        } catch (Exception e) {
+            throw new RuntimeException("OSS upload failed: " + e.getMessage(), e);
+        } finally {
+            ossClient.shutdown();
+        }
     }
 }
