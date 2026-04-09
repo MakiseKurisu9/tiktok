@@ -110,7 +110,6 @@ public interface VideoMapper {
     @Select("select * from follow where follow_id = #{userId}")
     List<Follow> getFollowers(Long userId);
 
-
-
-
+    @Update("update video set views = views + 1 where id = #{videoId}")
+    void incrementViews(Long videoId);
 }

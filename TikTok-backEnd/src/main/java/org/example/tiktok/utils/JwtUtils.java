@@ -33,6 +33,7 @@ public class JwtUtils {
                 .setSubject(user.getEmail())
                 .claim("userId", user.getId())
                 .claim("nickname", user.getNickname())
+                .claim("avatar", user.getAvatarSource())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expire))
                 .signWith(key, SignatureAlgorithm.HS256)

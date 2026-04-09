@@ -60,6 +60,18 @@ public class VideoController {
     public Result starVideo(@PathVariable Long videoId) {
         return videoService.starVideo(videoId);
     }
+
+    @GetMapping("/isLiked/{videoId}")
+    public Result isLiked(@PathVariable Long videoId) {
+        return videoService.isLiked(videoId);
+    }
+
+    @PostMapping("/view/{videoId}")
+    public Result viewVideo(@PathVariable Long videoId) {
+        return videoService.incrementViews(videoId);
+    }
+
+
     /**
      * 删除指定视频
      * @param videoId 视频 ID

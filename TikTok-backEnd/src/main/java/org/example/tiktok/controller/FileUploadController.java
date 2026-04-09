@@ -17,13 +17,14 @@ public class FileUploadController {
 
     @PostMapping("/upload")
     public Result upload(@RequestParam("file") MultipartFile file,
-                         @RequestParam("type") String type) {
+                         @RequestParam("type") String type,
+                         @RequestParam(value = "category", defaultValue = "general") String category) {
         // Validate type
         String dirPrefix;
         if ("avatar".equalsIgnoreCase(type)) {
             dirPrefix = "avatar/";
         } else if ("video".equalsIgnoreCase(type)) {
-            dirPrefix = "video/";
+            dirPrefix = "video/" + category + "/";
         } else {
             return Result.fail("Unsupported upload type: " + type);
         }
@@ -43,6 +44,7 @@ public class FileUploadController {
 
         try {
             String url = aliOSSUtil.uploadFile(filename, file.getInputStream(), type);
+            System.out.println("filename:"+filename);
             return Result.ok("Successfully uploaded " + type, url);
         } catch (Exception e) {
             return Result.fail("Upload failed: " + e.getMessage());

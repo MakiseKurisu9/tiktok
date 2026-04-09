@@ -34,4 +34,8 @@ public interface VideoService {
     Result getSubCommentsByRootId(int page, int limit, Long rootId);
 
     Result addOrUpdateVideo(Video video) throws JsonProcessingException;
+
+    Result incrementViews(Long videoId);
+
+    Result isLiked(Long videoId);
 }

@@ -14,6 +14,7 @@ public class FollowersDTO extends BaseEntity {
     private Long id;
     private String nickname;
     private String avatarSource;
+    private String userDescription;
     //exist = false
     private Boolean eachLike;
 }

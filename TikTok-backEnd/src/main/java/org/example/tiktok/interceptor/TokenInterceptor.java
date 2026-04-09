@@ -58,12 +58,12 @@ public class TokenInterceptor implements HandlerInterceptor {
 
             String nickname = claims.get("nickname", String.class);
             String email = claims.getSubject();
+            String avatar = claims.get("avatar", String.class);
 
             if(nickname != null && email != null) {
-                UserDTO userDTO = new UserDTO(userId,nickname,email);
+                UserDTO userDTO = new UserDTO(userId,nickname,email,avatar);
                 UserHolder.saveUser(userDTO);
             }
-            System.out.println("userId:" + userId+ " userNickName:" + nickname);
             return true;
         } catch (Exception e) {
             System.out.println(e.getMessage());

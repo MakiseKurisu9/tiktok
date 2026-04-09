@@ -108,10 +108,11 @@ public class UserServiceImpl implements LoginService {
         userInfo.put("id", user.getId());
         userInfo.put("nickname", user.getNickname());
         userInfo.put("email", user.getEmail());
+        userInfo.put("avatarSource", user.getAvatarSource());
 
         resultMap.put("userInfo",userInfo);
 
-        UserDTO currentUser = new UserDTO(user.getId(),user.getNickname(),user.getEmail());
+        UserDTO currentUser = new UserDTO(user.getId(),user.getNickname(),user.getEmail(),user.getAvatarSource());
         UserHolder.saveUser(currentUser);
         System.out.println("login success");
         return Result.ok("登陆成功",resultMap);
@@ -143,8 +144,11 @@ public class UserServiceImpl implements LoginService {
         String code = emailCodeDTO.getCode();
         String mail = emailCodeDTO.getEmail();
         String uuid = emailCodeDTO.getUuid();
-        System.out.println(uuid);
         String getCode = stringRedisTemplate.opsForValue().get(CODE_PREFIX + uuid);
+        if(loginMapper.isEmailExist(mail) > 0) {
+            return Result.fail("该邮箱已被注册，请更换邮箱");
+        }
+
         if(getCode == null || !code.equalsIgnoreCase(getCode) ) {
             return Result.fail("请输入正确的图形验证码");
         }

@@ -11,5 +11,4 @@ public class Follow {
     //粉丝id
     private Long followerId;
 
-    private Long userId;
 }

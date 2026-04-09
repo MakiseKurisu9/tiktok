@@ -124,8 +124,13 @@ public class CustomerServiceImpl implements CustomerService {
         customerMapper.deleteSubscribeVideoTypesByUserId(userId);
         customerMapper.subscribeVideoTypes(userId,typeIds);
 
+        // boost user model for each subscribed type
+        boostSubscribedTypes(userId, typeIds);
+
         return Result.ok("successfully subscribe");
     }
+
+
 
     @Override
     public Result getSubscribeByUserId() {
@@ -277,22 +282,7 @@ public class CustomerServiceImpl implements CustomerService {
         // ── 2. Use Redisson lock to prevent lost-update race condition ────────
         RLock lock = redissonClient.getLock("lock:user:model:" + userId);
         try {
-            lock.lock(3,TimeUnit.SECONDS);
-            // ── 3. Read existing model (unified — no if/else needed) ──────────
-            String json = stringRedisTemplate.opsForValue().get(key);
-            Map<Long,Double> modelMap = new HashMap<>();
-
-            // ── 3. Read existing model (unified — no if/else needed) ──────────
-            if (json != null && !json.isBlank()) {
-                UserModel existingModel = objectMapper.readValue(json, UserModel.class);
-                if(existingModel.getModel() != null) {
-                    modelMap = new HashMap<>(existingModel.getModel());
-                }
-            }
-            // ── 4. Decay old interests, then add new score ────────────────────
-            //    Multiply every existing weight by 0.9 so stale interests shrink
-            //    over time, then add the new observation on top.
-            modelMap.replaceAll((k,v) -> v * Decay_FACTOR);
+            Map<Long, Double> modelMap = getModelMap(lock, key);
             modelMap.merge(userModelDTO.getTypeId(), clampedScore, Double::sum);
 
             // ── 5. Re-normalise so all weights sum to 1.0 ─────────────────────
@@ -313,6 +303,57 @@ public class CustomerServiceImpl implements CustomerService {
             lock.unlock();
         }
         return Result.ok("successfully update");
+    }
+
+    private static final double SUBSCRIBE_BOOST_SCORE = 0.5; // tweak as needed
+
+    private void boostSubscribedTypes(Long userId, List<Long> typeIds) {
+        String key = "user:model:" + userId;
+        RLock lock = redissonClient.getLock("lock:user:model:" + userId);
+
+        try {
+            Map<Long, Double> modelMap = getModelMap(lock, key);
+            for (Long typeId : typeIds) {
+                // Subscribe gives a stronger signal than just watching
+                modelMap.merge(typeId, SUBSCRIBE_BOOST_SCORE, Double::sum);
+            }
+
+            // ── Re-normalise ──────────────────────────────────────────────────
+            double total = modelMap.values().stream().mapToDouble(Double::doubleValue).sum();
+            if (total > 0) {
+                modelMap.replaceAll((k, v) -> v / total);
+            }
+
+            // ── Persist ───────────────────────────────────────────────────────
+            UserModel updated = new UserModel();
+            updated.setModel(modelMap);
+            cacheClient.set(key, updated, 7L, TimeUnit.DAYS);
+
+        } catch (JsonProcessingException e) {
+            log.error("Failed to boost user model for userId={}", userId, e);
+        } finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+    }
+
+    private Map<Long, Double> getModelMap(RLock lock, String key) throws JsonProcessingException {
+        lock.lock(3, TimeUnit.SECONDS);
+        // ── Read existing model ───────────────────────────────────────────
+        String json = stringRedisTemplate.opsForValue().get(key);
+        Map<Long, Double> modelMap = new HashMap<>();
+
+        if (json != null && !json.isBlank()) {
+            UserModel existingModel = objectMapper.readValue(json, UserModel.class);
+            if (existingModel.getModel() != null) {
+                modelMap = new HashMap<>(existingModel.getModel());
+            }
+        }
+
+        // ── Apply decay then boost each subscribed typeId ─────────────────
+        modelMap.replaceAll((k, v) -> v * Decay_FACTOR);
+        return modelMap;
     }
 
     private Boolean isFollow(Long followUserId){

@@ -2,6 +2,7 @@ package org.example.tiktok.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tiktok.dto.PageBean;
@@ -16,10 +17,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -43,21 +41,39 @@ public class HotRank {
 
     private static final int HOT_LIMIT = 400;
 
+    @PostConstruct
+    // 应用启动时计算一次热点排行榜，确保有数据可用
+    public void init() {
+        calculateDailyHotRank();
+        log.info("hot rank initialized on startup");
+    }
+
     @Scheduled(cron = "0 0 0 * * ?") // 每天 0 点执行
     public void calculateDailyHotRank() {
         List<VideoHot> scored = calculateScore();
+        //if scored is empty, expire will throw error, use tempKey to avoid it
+        String tempKey = REDIS_HOT_RANK_KEY + ":temp";
         // 写入Redis
-        stringRedisTemplate.delete(REDIS_HOT_RANK_KEY);
+        stringRedisTemplate.delete(tempKey);
 
         for (VideoHot v : scored) {
             try {
                 String json = objectMapper.writeValueAsString(v);
-                stringRedisTemplate.opsForZSet().add(REDIS_HOT_RANK_KEY, json, v.getHotScore());
+                stringRedisTemplate.opsForZSet().add(tempKey, json, v.getHotScore());
             } catch (JsonProcessingException e) {
                 log.error("序列化Video对象失败: {}", v.getVideoId(), e);
             }
         }
-        stringRedisTemplate.expire(REDIS_HOT_RANK_KEY, Duration.ofDays(1));
+
+        Boolean tempExists = stringRedisTemplate.hasKey(tempKey);
+        if(Boolean.TRUE.equals(tempExists)) {
+            stringRedisTemplate.rename(tempKey,REDIS_HOT_RANK_KEY);
+            stringRedisTemplate.expire(REDIS_HOT_RANK_KEY, Duration.ofDays(1));
+        } else {
+            stringRedisTemplate.delete(REDIS_HOT_RANK_KEY);
+        }
+
+
     }
 
     private List<VideoHot> calculateScore(){
@@ -76,7 +92,7 @@ public class HotRank {
 
     @Scheduled(cron = "0 0 0 * * ?") // 每天 0 点执行一次
     public void calculateEvery3Days() throws JsonProcessingException {
-        //如果投入实际使用
+        //如果投入实际使用 开发环境下没有持续上传的视频，三日热点可能没有数据，暂时注释掉这个限制
         //if (LocalDate.now().getDayOfYear() % 3 != 0) return;
         PageBean<Video> recentHot = getRecentHotVideo(1,10);
         log.info("三日热点视频更新成功，共 {} 条", recentHot.getTotal());
@@ -85,25 +101,46 @@ public class HotRank {
     //热门视频
     public PageBean<Video> getRecentHotVideo(int pageNum,int pageSize) throws JsonProcessingException {
         List<Video> allVideos = videoMapper.getAllVideos();
-        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+        //for test
+        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(0);
 
         List<Video> recentVideos = allVideos.stream()
                 .filter(v -> v.getCreateTime().isAfter(threeDaysAgo))
                 .toList();
 
         List<Video> result;
+        //control return random videos but someway by weight
+        Random random = new Random();
 
         if (!recentVideos.isEmpty()) {
+            // Compute avg and noise ONCE before sorting
+            double avg = recentVideos.stream()
+                    .mapToDouble(this::computeHotScore)
+                    .average().orElse(1);
+            double noise = avg * 0.2;
+
+            // Pre-compute each video's final score with random noise ONCE
+            Map<Long, Double> scoreMap = recentVideos.stream()
+                    .collect(Collectors.toMap(
+                            Video::getId,
+                            v -> computeHotScore(v) + random.nextDouble() * noise
+                    ));
+
             result = recentVideos.stream()
                     .filter(v -> computeHotScore(v) > HOT_LIMIT)
-                    .sorted((v1, v2) ->
-                            Double.compare(computeHotScore(v2), computeHotScore(v1)))
+                    .sorted((v1, v2) -> Double.compare(scoreMap.get(v2.getId()), scoreMap.get(v1.getId())))
                     .collect(Collectors.toList());
+
         } else {
-            // ❗ fallback：使用所有视频
+            // Pre-compute scores for fallback too
+            Map<Long, Double> scoreMap = allVideos.stream()
+                    .collect(Collectors.toMap(
+                            Video::getId,
+                            v -> computeHotScore(v) + random.nextDouble() * 50
+                    ));
+
             result = allVideos.stream()
-                    .sorted((v1, v2) ->
-                            Double.compare(computeHotScore(v2), computeHotScore(v1)))
+                    .sorted((v1, v2) -> Double.compare(scoreMap.get(v2.getId()), scoreMap.get(v1.getId())))
                     .collect(Collectors.toList());
         }
 
@@ -135,6 +172,7 @@ public class HotRank {
         Set<String> jsonSet = stringRedisTemplate.opsForZSet().reverseRange(REDIS_HOT_RANK_KEY, 0, 9);
 
         if (jsonSet == null || jsonSet.isEmpty()) {
+
             return Collections.emptyList();
         }
 
@@ -148,6 +186,11 @@ public class HotRank {
                     }
                 })
                 .filter(Objects::nonNull)
+                .map( v-> {
+                    double rounded = Math.round(v.getHotScore() * 100 * 10) / 10.0;
+                    v.setHotScore(rounded);
+                    return v;
+                        })
                 .collect(Collectors.toList());
     }
 }

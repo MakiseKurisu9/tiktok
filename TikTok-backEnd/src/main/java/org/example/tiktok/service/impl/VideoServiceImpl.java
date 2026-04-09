@@ -364,9 +364,14 @@ public class VideoServiceImpl implements VideoService {
         Long userId = UserHolder.getUser().getId();
         video.setPublisherId(userId);
         video.setUpdateTime(LocalDateTime.now());
+        video.setPublisherName(UserHolder.getUser().getUsername());
         //add
         if(video.getId() == null) {
             video.setCreateTime(LocalDateTime.now());
+            video.setLikes(0L);
+            video.setShares(0L);
+            video.setViews(0L);
+            video.setFavourites(0L);
             videoMapper.addVideo(video);
         } else {
             videoMapper.updateVideo(video);
@@ -376,7 +381,7 @@ public class VideoServiceImpl implements VideoService {
         //feed 推送给所有粉丝
         List<Follow> followers = videoMapper.getFollowers(userId);
         for(Follow follow : followers) {
-            Long followerId = follow.getUserId();
+            Long followerId = follow.getFollowerId();
             String key = "feed:" + followerId;
             //雪花id为score
             stringRedisTemplate.opsForZSet().add(key,video.getId().toString(),snowflakeIdWorker.nextId());
@@ -384,6 +389,20 @@ public class VideoServiceImpl implements VideoService {
         //无论是添加还是更新 都需要更新缓存数据
         cacheClient.set("index:video:" + video.getId(),objectMapper.writeValueAsString(video),2L,TimeUnit.HOURS);
         return Result.ok("success update or add",video);
+    }
+
+    @Override
+    public Result incrementViews(Long videoId) {
+        videoMapper.incrementViews(videoId);
+        return Result.ok("successfully increment views");
+    }
+
+    @Override
+    public Result isLiked(Long videoId) {
+        Long userId = UserHolder.getUser().getId();
+        String key = "video:liked:" + videoId;
+        Boolean isMember = stringRedisTemplate.opsForSet().isMember(key, userId.toString());
+        return Result.ok("successfully get like status",BooleanUtils.isTrue(isMember));
     }
 
 

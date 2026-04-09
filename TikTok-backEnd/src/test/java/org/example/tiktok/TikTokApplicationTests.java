@@ -215,7 +215,7 @@ class TikTokApplicationTests {
             InputStream inputStream = new FileInputStream(localFilePath);
 
             // 调用上传方法
-            String url = aliOSSUtil.uploadFile(objectName, inputStream);
+            String url = aliOSSUtil.uploadFile(objectName, inputStream,"avatar");
             System.out.println("this test for git is work");
             System.out.println("上传成功！访问地址：" + url);
 

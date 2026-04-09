@@ -16,5 +16,7 @@ public interface LoginMapper {
     @Update("update user set password = #{newPassword} where email = #{email}")
     void changePassword(@Param("newPassword")String newPassword,@Param("email") String email);
 
+    @Select("select count(*) from user where email = #{email}")
+    int isEmailExist(String email);
 
 }
