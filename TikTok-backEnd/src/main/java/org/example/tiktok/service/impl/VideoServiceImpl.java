@@ -200,6 +200,7 @@ public class VideoServiceImpl implements VideoService {
             videoMapper.addComment(comment);
             comment.setRootId(comment.getId());
             videoMapper.updateRootId(comment.getId(),comment.getId());
+            videoMapper.updateCommentCountByVideoId(videoId,1);
         } else {//二级评论 回复评论的评论
             Comment parentComment = videoMapper.getCommentById(parentId);
             if(parentComment == null) {
@@ -273,6 +274,7 @@ public class VideoServiceImpl implements VideoService {
         //为根评论
         if(comment.getParentId().equals(0L)) {
             videoMapper.deleteCommentByRootId(comment.getRootId());
+
         } else {
             //不为根评论 删除底下的评论
             videoMapper.deleteComment(comment.getId());

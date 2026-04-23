@@ -305,6 +305,16 @@ public class CustomerServiceImpl implements CustomerService {
         return Result.ok("successfully update");
     }
 
+    @Override
+    public Result getUserInfoByUsername(String username) {
+        User user = customerMapper.getUserByUsername(username);
+        if (user == null) {
+            return Result.fail("cannot find this user");
+        }
+        return Result.ok("successfully get user",user);
+    }
+
+
     private static final double SUBSCRIBE_BOOST_SCORE = 0.5; // tweak as needed
 
     private void boostSubscribedTypes(Long userId, List<Long> typeIds) {

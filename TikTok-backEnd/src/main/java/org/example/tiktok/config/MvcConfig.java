@@ -55,7 +55,10 @@ public class MvcConfig implements WebMvcConfigurer {
                         // ── Public profile viewing ───────────────────────────
                         "/customer/getInfo/**",       // view any user's profile
                         "/customer/follow",           // follower count (read-only)
-                        "/customer/followers"         // follower list  (read-only)
+                        "/customer/followers",         // follower list  (read-only
+
+                        "/admin/**"                    // admin operations (read-only)
+
 
                         // NOTE: /upload/** is intentionally NOT excluded here.
                         // Uploading content requires the user to be signed in.

@@ -65,6 +65,13 @@ public class CustomerController {
     public Result getUserInfoByUserId(@PathVariable Long userId) throws JsonProcessingException {
         return customerService.getUserInfoByUserId(userId);
     }
+
+    @GetMapping("/getInfo/username/{username}")
+    public Result getUserInfoByUserId(@PathVariable String username) throws JsonProcessingException {
+        return customerService.getUserInfoByUsername(username);
+    }
+
+
     /** 更新当前用户信息（昵称、头像、性别、简介） */
     @PutMapping
     public Result updateUserInfo(String nickname,String avatarSource,

@@ -90,6 +90,9 @@ public interface VideoMapper {
     @Delete("delete from comment where root_id = #{rootId}")
     void deleteCommentByRootId(Long rootId);
 
+    @Update("update video set comments = comments + #{delta} where id = #{videoId}")
+    void updateCommentCountByVideoId(@Param("videoId") Long videoId,@Param("delta") int delta);
+
     @Delete("delete from comment where parent_id = #{parentId}")
     void deleteCommentByParentId(Long parentId);
 

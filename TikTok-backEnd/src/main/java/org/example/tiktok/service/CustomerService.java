@@ -37,5 +37,5 @@ public interface CustomerService {
     Result updateUserModel(UserModelDTO userModelDTO) throws JsonProcessingException;
 
 
-
+    Result getUserInfoByUsername(String username);
 }

@@ -82,4 +82,7 @@ public interface CustomerMapper {
 
     // 查询关注我的人，我是否关注了 互关
     List<Long> getFollowersInList(@Param("userId") Long userId, @Param("targetIds") List<Long> targetIds);
+
+    @Select("select * from user where username = #{username}")
+    User getUserByUsername(String username);
 }
