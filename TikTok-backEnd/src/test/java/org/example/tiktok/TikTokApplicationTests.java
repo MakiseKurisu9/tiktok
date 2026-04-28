@@ -7,11 +7,15 @@ import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectListing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.example.tiktok.dto.EmailCodeDTO;
 import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.Video.Video;
+import org.example.tiktok.entity.Video.VideoDocument;
+import org.example.tiktok.mapper.IndexMapper;
 import org.example.tiktok.mapper.VideoMapper;
+import org.example.tiktok.repository.VideoEsRepository;
 import org.example.tiktok.service.IndexService;
 import org.example.tiktok.service.LoginService;
 import org.example.tiktok.utils.AliOSSUtil;
@@ -33,6 +37,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SpringBootTest
+@Slf4j
 class TikTokApplicationTests {
 
     @Resource
@@ -54,9 +59,41 @@ class TikTokApplicationTests {
     VideoMapper videoMapper;
 
     @Resource
+    IndexMapper indexMapper;
+
+    @Resource
     CacheClient cacheClient;
 
+    @Resource
+    VideoEsRepository videoEsRepository;
 
+
+    @Test
+    public void contextLoads() {
+        List<Video> videos = indexMapper.getAllVideos();
+
+
+        // 转换成ES文档并批量保存
+        List<VideoDocument> docs = videos.stream().map(video -> {
+            VideoDocument doc = new VideoDocument();
+            doc.setId(video.getId());
+            doc.setTitle(video.getTitle());
+            doc.setDescription(video.getDescription());
+            doc.setType(video.getType());
+            doc.setSource(video.getSource());
+            doc.setImgSource(video.getImgSource());
+            doc.setPublisherId(video.getPublisherId());
+            doc.setPublisherName(video.getPublisherName());
+            doc.setLikes(video.getLikes());
+            doc.setViews(video.getViews());
+            doc.setFavourites(video.getFavourites());
+            doc.setCreateTime(video.getCreateTime());
+            return doc;
+        }).toList();
+
+        videoEsRepository.saveAll(docs);
+        log.info("同步视频到ES完成，共{}条", docs.size());
+    }
 
     @Test
     void testMail() {

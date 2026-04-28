@@ -46,5 +46,7 @@ public interface IndexMapper {
 
     List<Video> getRandomVideosByTagId(@Param("tagId") Long tagId,@Param("limit") int limit);
 
+    @Select("select * from video")
+    List<Video> getAllVideos();
 }
 

@@ -38,7 +38,7 @@ public class TokenInterceptor implements HandlerInterceptor {
         }
 
         try {
-            System.out.println(token);
+
             Claims claims = jwtUtils.parseToken(token);
 
             Long userId = claims.get("userId", Long.class);

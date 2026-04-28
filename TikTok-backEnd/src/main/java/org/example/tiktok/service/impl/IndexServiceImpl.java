@@ -6,11 +6,13 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.dto.VideoHot;
 import org.example.tiktok.entity.Result;
 import org.example.tiktok.entity.User.UserModel;
 import org.example.tiktok.entity.Video.Video;
+import org.example.tiktok.entity.Video.VideoDocument;
 import org.example.tiktok.entity.Video.VideoType;
 import org.example.tiktok.mapper.IndexMapper;
 import org.example.tiktok.service.IndexService;
@@ -18,16 +20,24 @@ import org.example.tiktok.utils.CacheClient;
 import org.example.tiktok.utils.HotRank;
 import org.example.tiktok.utils.PublicVideoServiceUtil;
 import org.example.tiktok.utils.UserHolder;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.elasticsearch.core.SearchHit;
+
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 public class IndexServiceImpl implements IndexService {
 
     @Resource
@@ -44,6 +54,9 @@ public class IndexServiceImpl implements IndexService {
 
     @Resource
     private ObjectMapper objectMapper ;
+
+    @Resource
+    private ElasticsearchOperations elasticsearchOperations;
 
     @Resource
     HotRank hotRank;
@@ -126,8 +139,9 @@ public class IndexServiceImpl implements IndexService {
 
 
     @Override
+
     public Result searchVideo(String searchName, Integer page, Integer limit) {
-        PageBean<Video> pageResult = new PageBean<>();
+        log.info("搜索关键词: {}, page: {}, limit: {}", searchName, page, limit); // 加这行
         //搜索框输入非空判断 前端进行
         Long userId = UserHolder.getUser().getId();
         String key = "search:history:" + userId;
@@ -143,17 +157,50 @@ public class IndexServiceImpl implements IndexService {
             stringRedisTemplate.opsForZSet().removeRange(key,0,size - 11);
         }
 
-        PageHelper.startPage(page,limit);
-        List<Video> videos = indexMapper.searchVideo(searchName);
+        Query searchQuery = NativeQuery.builder()
+                .withQuery(q -> q
+                        .bool(b -> b
+                                .should(s -> s
+                                        .multiMatch(m -> m
+                                                .fields("title^3", "description^1")
+                                                .query(searchName)
+                                        )
+                                )
+                                .should(s -> s
+                                        .wildcard(w -> w
+                                                .field("title")
+                                                .value("*" + searchName + "*")
+                                                .caseInsensitive(true)
+                                        )
+                                )
+                                .should(s -> s
+                                        .wildcard(w -> w
+                                                .field("description")
+                                                .value("*" + searchName + "*")
+                                                .caseInsensitive(true)
+                                        )
+                                )
+                                .minimumShouldMatch("1")
+                        )
+                )
+                .withPageable(PageRequest.of(page - 1, limit))
+                .build();
 
-        PageInfo<Video> pageInfo= new PageInfo<>(videos);
+        SearchHits<VideoDocument> hits = elasticsearchOperations.search(searchQuery, VideoDocument.class);
 
-        pageResult.setTotal(pageInfo.getTotal());
-        pageResult.setItems(pageInfo.getList());
-
-        if(videos.isEmpty()) {
-            return Result.ok("cannot search any information",Collections.emptyList());
+        if (!hits.hasSearchHits()) {
+            return Result.ok("cannot search any information", Collections.emptyList());
         }
+
+        List<VideoDocument> videos = hits.getSearchHits()
+                .stream()
+                .map(SearchHit::getContent)
+                .toList();
+
+        PageBean<VideoDocument> pageResult = new PageBean<>();
+        pageResult.setTotal(hits.getTotalHits());
+        pageResult.setItems(videos);
+
         return Result.ok("successfully search data",pageResult);
 
     }

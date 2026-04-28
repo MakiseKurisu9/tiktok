@@ -11,6 +11,8 @@ spring:
       port: 6379
       host: 192.168.106.129
       password: ${REDIS_PASSWORD}
+  elasticsearch:
+    uris: 192.168.106.129:9200
   profiles:
     active: dev
   mail:
@@ -21,6 +23,16 @@ spring:
     multipart:
       max-file-size: 500MB
       max-request-size: 500MB
+  rabbitmq:
+    host: 192.168.106.129
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        acknowledge-mode: manual
+    stream:
+      virtual-host: /
 
 
 mybatis:

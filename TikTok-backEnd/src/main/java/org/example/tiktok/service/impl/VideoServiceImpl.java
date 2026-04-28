@@ -7,7 +7,9 @@ import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
+import org.example.tiktok.config.RabbitMQConfig;
 import org.example.tiktok.dto.CommentersDTO;
+import org.example.tiktok.dto.LikeMessage;
 import org.example.tiktok.dto.PageBean;
 import org.example.tiktok.dto.ScrollResult;
 import org.example.tiktok.entity.Result;
@@ -15,11 +17,13 @@ import org.example.tiktok.entity.User.Follow;
 import org.example.tiktok.entity.Video.Comment;
 import org.example.tiktok.entity.Video.Video;
 import org.example.tiktok.mapper.VideoMapper;
+import org.example.tiktok.repository.VideoEsRepository;
 import org.example.tiktok.service.VideoService;
 import org.example.tiktok.utils.CacheClient;
 import org.example.tiktok.utils.PublicVideoServiceUtil;
 import org.example.tiktok.utils.SnowflakeIdWorker;
 import org.example.tiktok.utils.UserHolder;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -35,6 +39,12 @@ import static org.example.tiktok.utils.SystemConstant.History_PREFIX;
 @Service
 @Slf4j
 public class VideoServiceImpl implements VideoService {
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
+    @Resource
+    VideoEsRepository videoEsRepository;
+
     @Resource
     VideoMapper videoMapper;
 
@@ -121,28 +131,31 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    @Transactional
     public Result starVideo(Long videoId) {
         Long userId = UserHolder.getUser().getId();
         String key = "video:liked:" + videoId;
-        //判断用户是否已经点赞
-        Boolean member = stringRedisTemplate.opsForSet().isMember(key, userId.toString());
-        if (BooleanUtils.isFalse(member)) {
-            Boolean isStarSuccess = videoMapper.starVideo(videoId) ;
-            Boolean isLikeSuccess =videoMapper.videoLike(videoId,userId) ;
-            if(isStarSuccess && isLikeSuccess){
-                stringRedisTemplate.opsForSet().add(key, userId.toString());
-                return Result.ok("star success");
-            }
-        } else {
-            Boolean isNotStarSuccess = videoMapper.decreaseStarVideo(videoId);
-            Boolean isNotLikeSuccess =videoMapper.videoNotLike(videoId,userId);
-            if(isNotStarSuccess && isNotLikeSuccess){                stringRedisTemplate.opsForSet().remove(key, userId.toString());
-                return Result.ok("decrease star success");
-            }
-        }
 
-        return Result.fail("star not affect");
+        Boolean member = stringRedisTemplate.opsForSet().isMember(key, userId.toString());
+
+        if (BooleanUtils.isFalse(member)) {
+            // 先更新Redis，让用户立刻看到点赞效果
+            stringRedisTemplate.opsForSet().add(key, userId.toString());
+            // 发MQ消息，异步更新DB（不再同步写DB）
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.LIKE_EXCHANGE,
+                    RabbitMQConfig.LIKE_ROUTING_KEY,
+                    new LikeMessage(videoId, userId, 1)
+            );
+            return Result.ok("star success");
+        } else {
+            stringRedisTemplate.opsForSet().remove(key, userId.toString());
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.LIKE_EXCHANGE,
+                    RabbitMQConfig.LIKE_ROUTING_KEY,
+                    new LikeMessage(videoId, userId, -1)
+            );
+            return Result.ok("decrease star success");
+        }
     }
 
     @Transactional
@@ -154,6 +167,7 @@ public class VideoServiceImpl implements VideoService {
         Boolean isSuccess = videoMapper.deleteVideo(videoId);
         if(BooleanUtils.isTrue(isSuccess)) {
             stringRedisTemplate.delete("index:video:"+videoId);//maybe exist cache in redis
+            videoEsRepository.deleteById(videoId); // 新增：同步删除ES文档
             return Result.ok("successfully delete video");
         } else {
             return Result.fail("fail to delete video");
@@ -363,6 +377,7 @@ public class VideoServiceImpl implements VideoService {
     //非空判断 前端进行
     @Override
     public Result addOrUpdateVideo(Video video) throws JsonProcessingException {
+        System.out.println("this is video from front" + video);
         Long userId = UserHolder.getUser().getId();
         video.setPublisherId(userId);
         video.setUpdateTime(LocalDateTime.now());
@@ -390,6 +405,13 @@ public class VideoServiceImpl implements VideoService {
         }
         //无论是添加还是更新 都需要更新缓存数据
         cacheClient.set("index:video:" + video.getId(),objectMapper.writeValueAsString(video),2L,TimeUnit.HOURS);
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.VIDEO_SYNC_EXCHANGE,
+                RabbitMQConfig.VIDEO_SYNC_ROUTING_KEY,
+                video.getId()
+        );
+
         return Result.ok("success update or add",video);
     }
 
