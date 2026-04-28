@@ -170,7 +170,7 @@ public class VideoServiceImpl implements VideoService {
             videoEsRepository.deleteById(videoId); // 新增：同步删除ES文档
             return Result.ok("successfully delete video");
         } else {
-            return Result.fail("fail to delete video");
+            return Result.fail("fail to delete video!");
         }
     }
 
