@@ -22,8 +22,19 @@ public class AliOSSUtil {
     private static final String AVATAR_BUCKET = "save-avatar-tiktok";
     private static final String VIDEO_BUCKET = "tiktok-personal";
 
+    private static final String COVER_BUCKET = "save-cover-tiktok";
+
     public String uploadFile(String objectName, InputStream in, String type) {
-        String bucketName = "video".equalsIgnoreCase(type) ? VIDEO_BUCKET : AVATAR_BUCKET;
+        String bucketName ;
+        if ("avatar".equalsIgnoreCase(type)) {
+            bucketName = AVATAR_BUCKET;
+        } else if ("video".equalsIgnoreCase(type) ) {
+            bucketName = VIDEO_BUCKET;
+        } else if ("cover".equalsIgnoreCase(type) ) {
+            bucketName = COVER_BUCKET;
+        } else {
+            throw new RuntimeException("Unsupported upload type");
+        }
 
         OSS ossClient = new OSSClientBuilder().build(ENDPOINT, accessKeyId, accessKeySecret);
         try {

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class HotRank {
-    private static final double HALF_LIFE_SECONDS = 12 * 3600;
+    private static final double HALF_LIFE_SECONDS = 7 * 24 * 3600;
     private static final String REDIS_HOT_RANK_KEY = "video:hot:top10";
 
     @Resource

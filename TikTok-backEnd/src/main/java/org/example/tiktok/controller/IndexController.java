@@ -59,7 +59,6 @@ public class IndexController {
      */
     @PostMapping("/share/{videoId}")
     public Result shareVideo(@PathVariable Long videoId, HttpServletRequest request) {
-        /*todo*/
         return indexService.shareVideo(videoId,request);
     }
 

@@ -5,9 +5,14 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tiktok.config.RabbitMQConfig;
 import org.example.tiktok.dto.LikeMessage;
+import org.example.tiktok.entity.Video.Video;
+import org.example.tiktok.entity.Video.VideoDocument;
 import org.example.tiktok.mapper.VideoMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +24,9 @@ public class LikeConsumer {
 
     @Resource
     VideoMapper videoMapper;
+
+    @Resource
+    private ElasticsearchOperations elasticsearchOperations;
 
     @RabbitListener(queues = RabbitMQConfig.LIKE_QUEUE)
     public void handleLike(LikeMessage msg, Channel channel,
@@ -33,6 +41,23 @@ public class LikeConsumer {
                 videoMapper.decreaseStarVideo(msg.getVideoId());
                 videoMapper.videoNotLike(msg.getVideoId(), msg.getUserId());
             }
+
+            // 2. 查询最新视频数据
+            Video video = videoMapper.getVideoByVideoId(msg.getVideoId());
+
+            // 3. 同步到 ES
+            if (video != null) {
+                VideoDocument doc = new VideoDocument();
+                BeanUtils.copyProperties(video, doc);
+
+                elasticsearchOperations.save(doc);
+
+                // 强制刷新索引，让搜索立刻可见
+                IndexOperations indexOps =
+                        elasticsearchOperations.indexOps(VideoDocument.class);
+                indexOps.refresh();
+            }
+
             log.info("点赞消息处理成功: videoId={}, delta={}", msg.getVideoId(), msg.getDelta());
             // 告诉RabbitMQ这条消息处理成功，可以删除了
             channel.basicAck(deliveryTag, false);

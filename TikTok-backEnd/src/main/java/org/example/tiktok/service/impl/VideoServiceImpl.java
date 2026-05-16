@@ -194,8 +194,6 @@ public class VideoServiceImpl implements VideoService {
 
     }
 
-
-
     @Override
     @Transactional
     public Result commentOrAnswerComment(Long videoId, Long parentId, String content) {

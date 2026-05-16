@@ -139,7 +139,6 @@ public class IndexServiceImpl implements IndexService {
 
 
     @Override
-
     public Result searchVideo(String searchName, Integer page, Integer limit) {
         log.info("搜索关键词: {}, page: {}, limit: {}", searchName, page, limit); // 加这行
         //搜索框输入非空判断 前端进行

@@ -25,7 +25,9 @@ public class FileUploadController {
             dirPrefix = "avatar/";
         } else if ("video".equalsIgnoreCase(type)) {
             dirPrefix = "video/" + category + "/";
-        } else {
+        } else if ("cover".equalsIgnoreCase(type)) {
+            dirPrefix = "cover/" + category + "/";
+        }else {
             return Result.fail("Unsupported upload type: " + type);
         }
 

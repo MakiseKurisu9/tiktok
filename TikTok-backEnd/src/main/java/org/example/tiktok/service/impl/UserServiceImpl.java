@@ -145,9 +145,6 @@ public class UserServiceImpl implements LoginService {
         String mail = emailCodeDTO.getEmail();
         String uuid = emailCodeDTO.getUuid();
         String getCode = stringRedisTemplate.opsForValue().get(CODE_PREFIX + uuid);
-        if(loginMapper.isEmailExist(mail) > 0) {
-            return Result.fail("该邮箱已被注册，请更换邮箱");
-        }
 
         if(getCode == null || !code.equalsIgnoreCase(getCode) ) {
             return Result.fail("请输入正确的图形验证码");
@@ -161,7 +158,7 @@ public class UserServiceImpl implements LoginService {
 
             Email from = new Email(FROM_MAIL);
             Email to = new Email(mail);
-            String subject = "Login code";
+            String subject = "Email code";
             String content = "Your code is " + mailCode + ", please input in five minutes";
             Content body = new Content("text/plain", content);
             Mail mailMessage = new Mail(from, subject, to, body);

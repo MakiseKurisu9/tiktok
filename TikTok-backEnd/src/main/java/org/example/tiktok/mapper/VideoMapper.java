@@ -53,6 +53,9 @@ public interface VideoMapper {
     @Select("select * from video where publisher_id = #{userId}")
     List<Video> getVideosByUserId(@Param("userId") Long userId);
 
+    @Select("select * from video where id = #{videoId}")
+    Video getVideoByVideoId(Long videoId);
+
     @Options(useGeneratedKeys = true, keyProperty = "id")
     @Insert("insert into comment(video_id, from_user_id, to_user_id, content, parent_id, root_id, likes_count, child_count, create_time, update_time) " +
             "VALUES (#{videoId},#{fromUserId},#{toUserId},#{content},#{parentId},#{rootId},#{likesCount},#{childCount},NOW(),NOW())")
