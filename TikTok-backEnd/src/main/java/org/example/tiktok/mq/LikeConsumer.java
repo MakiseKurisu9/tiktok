@@ -49,7 +49,6 @@ public class LikeConsumer {
             if (video != null) {
                 VideoDocument doc = new VideoDocument();
                 BeanUtils.copyProperties(video, doc);
-
                 elasticsearchOperations.save(doc);
 
                 // 强制刷新索引，让搜索立刻可见
